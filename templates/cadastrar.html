@@ -34,8 +34,17 @@
             {% endfor %}
         </select>
 
-        <input type="number" name="ano" placeholder="Ano de lançamento" required>
-
+        <input
+        type="text"
+        name="ano"
+        placeholder="Ano de lançamento"
+        value="{{ jogo.ano if jogo else '' }}"
+        inputmode="numeric"
+        maxlength="4"
+        pattern="[0-9]{4}"
+        oninput="this.value = this.value.replace(/\D/g, '')"
+        required>
+        
         <label class="label-capa">
             🖼️ Imagem de Capa (opcional)
             <input type="file" name="capa" accept="image/*">

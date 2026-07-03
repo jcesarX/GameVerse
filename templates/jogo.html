@@ -16,7 +16,10 @@
 <div class="painel" style="display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;">
 
     {% if jogo.capa %}
-    <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
+    <div class="jogo-capa-container">
+        <img src="{{ url_for('static', filename=jogo.capa) }}"
+             class="jogo-capa">
+    </div>    
     {% else %}
     <div class="jogo-capa-placeholder">🎮</div>
     {% endif %}

@@ -47,7 +47,9 @@
                 placeholder="Ano (ex: 2021)"
                 value="{{ request.args.get('ano', '') }}"
                 min="1970"
-                max="2099"
+                max="{{ ano_atual}}"
+                step="1"
+                oninput="if(this.value.length > 4) this.value = this.value.slice(0,4)"
             >
 
             <button type="submit">Filtrar</button>
@@ -68,11 +70,17 @@
 <div class="card-wrapper">
     <a href="{{ url_for('jogo', id=jogo.id) }}" style="text-decoration:none;color:inherit;">
         <div class="card">
-            {% if jogo.capa %}
-            <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
-            {% else %}
-            <div class="card-capa-placeholder">🎮</div>
-            {% endif %}
+            <div class="card-capa-container">
+
+                {% if jogo.capa %}
+                    <img src="{{ url_for('static', filename=jogo.capa) }}"
+                         alt="Capa de {{ jogo.nome }}"
+                         class="card-capa">
+                {% else %}
+                    <div class="card-capa-placeholder">🎮</div>
+                {% endif %}
+            
+            </div>
             <div class="card-top">
                 <span class="tag">{{ jogo.genero }}</span>
                 <span class="ano">{{ jogo.ano }}</span>

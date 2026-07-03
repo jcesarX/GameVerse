@@ -3,6 +3,7 @@ import json
 import uuid
 from pathlib import Path
 from werkzeug.utils import secure_filename
+from datetime import datetime
 
 app = Flask(__name__)
      
@@ -102,12 +103,15 @@ def index():
 
         jogos_filtrados.append(jogo)
 
+    ano_atual = datetime.now().year 
+
     return render_template(
         'index.html',
         jogos=jogos_filtrados,
         categorias=carregar_json(CATEGORIAS_FILE),
         generos=carregar_json(GENEROS_FILE),
-        classificacoes=carregar_json(CLASSIFICACOES_FILE)
+        classificacoes=carregar_json(CLASSIFICACOES_FILE),
+        ano_atual=ano_atual
     )
 
 
@@ -139,6 +143,11 @@ def cadastrar():
 
         capa = salvar_capa(request.files.get('capa'))
 
+        ano  = int(request.form['ano'])
+        
+        if ano < 1970 or ano > datetime.now().year:
+            return "Ano inválido.", 400
+        
         novo_jogo = {
             "id": str(uuid.uuid4()),
             "nome": request.form['nome'],
@@ -146,7 +155,7 @@ def cadastrar():
             "genero": request.form['genero'],
             "categoria": request.form['categoria'],
             "classificacao": request.form['classificacao'],
-            "ano": int(request.form['ano']),
+            "ano": ano,
             "capa": capa
         }
 
@@ -197,18 +206,25 @@ def editar(id):
         jogo['genero'] = request.form['genero']
         jogo['categoria'] = request.form['categoria']
         jogo['classificacao'] = request.form['classificacao']
-        jogo['ano'] = int(request.form['ano'])
+        ano = int(request.form['ano'])
+
+        if ano < 1970 or ano > datetime.now().year:
+                return "Ano inválido.", 400
+
+        jogo['ano'] = ano
 
         salvar_json(JOGOS_FILE, jogos)
 
         return redirect(url_for('jogo', id=id))
 
+    ano_atual = datetime.now().year
     return render_template(
         'editar.html',
         jogo=jogo,
         categorias=carregar_json(CATEGORIAS_FILE),
         generos=carregar_json(GENEROS_FILE),
-        classificacoes=carregar_json(CLASSIFICACOES_FILE)
+        classificacoes=carregar_json(CLASSIFICACOES_FILE),
+        ano_atual=ano_atual
     )
 
 

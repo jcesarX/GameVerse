@@ -35,8 +35,17 @@
             {% endfor %}
         </select>
 
-        <input type="number" name="ano" placeholder="Ano de lançamento" value="{{ jogo.ano }}" required>
-
+        <input
+        type="number"
+        name="ano"
+        placeholder="Ano de lançamento"
+        value="{{ jogo.ano }}"
+        min="1970"
+        max="{{ ano_atual }}"
+        step="1"
+        oninput="if(this.value.length > 4) this.value = this.value.slice(0,4)"
+        required>
+        
         {% if jogo.capa %}
         <div class="capa-atual">
             <p style="opacity:.7;font-size:.9rem;">Capa atual:</p>
