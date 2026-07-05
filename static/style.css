@@ -366,3 +366,16 @@ button{
     border: 2px solid rgba(124, 58, 237, 0.4);
     background: rgba(0, 0, 0, 0.25);
 }
+
+.flash{
+    padding: 12px;
+    border-radius: 20px;
+    margin-bottom: 8px;
+    font-weight: bold;
+}
+
+.flash.error{
+    background: #ffdddd;
+    color: #a10000;
+    border: 1px solid #ff8d8d;
+}

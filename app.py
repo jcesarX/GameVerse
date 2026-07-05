@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 import json
 import uuid
 from pathlib import Path
@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from datetime import datetime
 
 app = Flask(__name__)
+app.secret_key = 'gameverse_secret_key'
      
 BASE_DIR = Path(__file__).parent
 
@@ -146,7 +147,9 @@ def cadastrar():
         ano  = int(request.form['ano'])
         
         if ano < 1970 or ano > datetime.now().year:
-            return "Ano inválido.", 400
+            flash(
+                f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
+            return redirect(url_for('cadastrar'))
         
         novo_jogo = {
             "id": str(uuid.uuid4()),
@@ -209,7 +212,9 @@ def editar(id):
         ano = int(request.form['ano'])
 
         if ano < 1970 or ano > datetime.now().year:
-                return "Ano inválido.", 400
+            flash(
+                f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
+            return redirect(url_for('editar', id=id))
 
         jogo['ano'] = ano
 
