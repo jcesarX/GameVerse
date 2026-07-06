@@ -5,6 +5,8 @@ from pathlib import Path
 from werkzeug.utils import secure_filename
 from datetime import datetime
 
+CLASSIFICACOES = ['Livre', '10 anos', '12 anos', '14 anos', '16 anos', '18 anos']
+
 app = Flask(__name__)
 app.secret_key = 'gameverse_secret_key'
      
@@ -13,7 +15,6 @@ BASE_DIR = Path(__file__).parent
 JOGOS_FILE = BASE_DIR / 'jogos.json'
 CATEGORIAS_FILE = BASE_DIR / 'categorias.json'
 GENEROS_FILE = BASE_DIR / 'generos.json'
-CLASSIFICACOES_FILE = BASE_DIR / 'classificacoes.json'
 
 UPLOAD_FOLDER = BASE_DIR / 'static' / 'uploads'
 UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -111,7 +112,7 @@ def index():
         jogos=jogos_filtrados,
         categorias=carregar_json(CATEGORIAS_FILE),
         generos=carregar_json(GENEROS_FILE),
-        classificacoes=carregar_json(CLASSIFICACOES_FILE),
+        classificacoes=CLASSIFICACOES,
         ano_atual=ano_atual
     )
 
@@ -172,7 +173,7 @@ def cadastrar():
         'cadastrar.html',
         categorias=carregar_json(CATEGORIAS_FILE),
         generos=carregar_json(GENEROS_FILE),
-        classificacoes=carregar_json(CLASSIFICACOES_FILE)
+        classificacoes=CLASSIFICACOES
     )
 
 
@@ -228,7 +229,7 @@ def editar(id):
         jogo=jogo,
         categorias=carregar_json(CATEGORIAS_FILE),
         generos=carregar_json(GENEROS_FILE),
-        classificacoes=carregar_json(CLASSIFICACOES_FILE),
+        classificacoes=CLASSIFICACOES,
         ano_atual=ano_atual
     )
 
