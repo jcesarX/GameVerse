@@ -73,12 +73,28 @@
             <div class="card-capa-container">
 
                 {% if jogo.capa %}
-                    <img src="{{ url_for('static', filename=jogo.capa) }}"
-                         alt="Capa de {{ jogo.nome }}"
-                         class="card-capa">
+                <div class="card-capa-container">
+                    {% if jogo.capa.startswith('http') %}
+
+                        <img src="{{ jogo.capa }}"
+                            alt="Capa de {{ jogo.nome }}"
+                            class="card-capa">
+
                 {% else %}
-                    <div class="card-capa-placeholder">🎮</div>
+
+                    <img src="{{ url_for('static', filename=jogo.capa) }}"
+                        alt="Capa de {{ jogo.nome }}"
+                        class="card-capa">
+
                 {% endif %}
+
+            </div>
+
+            {% else %}
+
+            <div class="card-capa-placeholder">🎮</div>
+
+            {% endif %}
             
             </div>
             <div class="card-top">

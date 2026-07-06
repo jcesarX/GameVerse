@@ -53,9 +53,9 @@ def salvar_json(arquivo, dados):
     with open(arquivo, 'w', encoding='utf-8') as f:
         json.dump(dados, f, ensure_ascii=False, indent=4)
 
+"""
+def salvar_capa(arquivo, url=None):
 
-def salvar_capa(arquivo):
-    
     if arquivo and arquivo.filename and allowed_file(arquivo.filename):
 
         filename = secure_filename(arquivo.filename)
@@ -70,8 +70,11 @@ def salvar_capa(arquivo):
 
         return f"uploads/{nome_arquivo}"
 
-    return None
+    if url:
+        return url.strip()
 
+    return None
+"""
 
 @app.route('/')
 def index():
@@ -143,7 +146,13 @@ def cadastrar():
 
         jogos = carregar_json(JOGOS_FILE)
 
-        capa = salvar_capa(request.files.get('capa'))
+        # arquivo = request.files.get("capa")
+
+        url = request.form.get("capa_url")
+
+        #capa = salvar_capa(arquivo, url)
+
+        capa = url.strip() if url else None
 
         ano  = int(request.form['ano'])
         
@@ -192,13 +201,18 @@ def editar(id):
 
     if request.method == 'POST':
 
-        nova_capa = salvar_capa(request.files.get('capa'))
+        # arquivo = request.files.get("capa")
+
+        url = request.form.get("capa_url")
+
+        # nova_capa = salvar_capa(arquivo, url)
+        nova_capa = url.strip() if url else None
 
         if nova_capa:
 
-            if jogo.get('capa'):
+            if jogo.get("capa") and not jogo["capa"].startswith("http"):
 
-                capa_antiga = BASE_DIR / 'static' / jogo['capa']
+                capa_antiga = BASE_DIR / "static" / jogo["capa"]
 
                 if capa_antiga.exists():
                     capa_antiga.unlink()
@@ -246,12 +260,12 @@ def deletar(id):
 
     if jogo:
 
-        if jogo.get('capa'):
+        """if jogo.get("capa") and not jogo["capa"].startswith("http"):
 
-            capa_path = BASE_DIR / 'static' / jogo['capa']
+            capa_path = BASE_DIR / "static" / jogo["capa"]
 
             if capa_path.exists():
-                capa_path.unlink()
+                capa_path.unlink()"""
 
         jogos = [j for j in jogos if j['id'] != id]
 

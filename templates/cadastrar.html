@@ -54,10 +54,16 @@
         oninput="this.value = this.value.replace(/\D/g, '')"
         required>
         
-        <label class="label-capa">
-            🖼️ Imagem de Capa (opcional)
+        <!--<label class="label-capa">
+            🖼️ Imagem de Capa 
             <input type="file" name="capa" accept="image/*">
-        </label>
+        </label>-->
+        <label for="capa_url">informe a URL da imagem (Opcional)</label>
+        <input
+            type="url"
+            id="capa_url"
+            name="capa_url"
+            placeholder="https://site.com/imagem.jpg">
 
         <button type="submit">Cadastrar Jogo</button>
 

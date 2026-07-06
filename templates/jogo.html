@@ -16,13 +16,26 @@
 <div class="painel" style="display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;">
 
     {% if jogo.capa %}
+
     <div class="jogo-capa-container">
-        <img src="{{ url_for('static', filename=jogo.capa) }}"
-             class="jogo-capa">
-    </div>    
+
+        {% if jogo.capa.startswith('http') %}
+
+            <img src="{{ jogo.capa }}"
+                alt="Capa de {{ jogo.nome }}"
+                class="jogo-capa">
+
     {% else %}
-    <div class="jogo-capa-placeholder">🎮</div>
+
+        <img src="{{ url_for('static', filename=jogo.capa) }}"
+             alt="Capa de {{ jogo.nome }}"
+             class="jogo-capa">
+
     {% endif %}
+
+</div>
+
+{% endif %}
 
     <div style="flex:1;min-width:200px;">
         <p style="margin-bottom:12px;"><strong>Descrição:</strong> {{ jogo.descricao }}</p>

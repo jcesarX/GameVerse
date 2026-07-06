@@ -47,19 +47,34 @@
         required>
         
         {% if jogo.capa %}
-        <div class="capa-atual">
-            <p style="opacity:.7;font-size:.9rem;">Capa atual:</p>
-            <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa atual" class="capa-preview">
-        </div>
+
+            {% if jogo.capa.startswith('http') %}
+
+                <img src="{{ jogo.capa }}"
+                    class="capa-preview">
+
+        {% else %}
+
+            <img src="{{ url_for('static', filename=jogo.capa) }}"
+                class="capa-preview">
+
         {% endif %}
 
-        <label class="label-capa">
-            🖼️ Nova Imagem de Capa (opcional — substitui a atual)
+{% endif %}
+
+        <!--<label class="label-capa">
+            🖼️ Nova Imagem de Capa
             <input type="file" name="capa" accept="image/*">
+        </label>-->
+        <label for="capa_url">Informe a URL da nova imagem (opcional — substitui a atual)
         </label>
+        <input
+            type="url"
+            id="capa_url"
+            name="capa_url"
+            placeholder="https://site.com/imagem.jpg">
 
-        <button type="submit">💾 Salvar Alterações</button>
-
+        <button type="submit">Salvar Alterações</button>
     </form>
 </div>
 {% endblock %}
