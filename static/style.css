@@ -379,3 +379,18 @@ button{
     color: #a10000;
     border: 1px solid #ff8d8d;
 }
+
+.flash{
+    padding:12px;
+    margin-bottom:20px;
+    border-radius:8px;
+    font-weight:bold;
+
+    opacity:1;
+    transition: opacity .5s ease;
+    animation: aparecer .4s ease;
+}
+
+.flash.fade-out{
+    opacity:0;
+}
