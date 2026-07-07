@@ -1,0 +1,52 @@
+[
+    {
+        "id": "3a434cac-0424-4a83-baa2-2e89ee953b88",
+        "nome": "rwewrqtq",
+        "descricao": "wertwretwret",
+        "genero": "Multiplayer",
+        "categoria": "Ação",
+        "classificacao": "10 anos",
+        "ano": 1999,
+        "capa": "https://m.media-amazon.com/images/M/MV5BYWVjODZjNDgtYjk4ZS00OTg5LTg5NDQtZDMxZDQ4ZmM5MGJmXkEyXkFqcGc@._V1_.jpg"
+    },
+    {
+        "id": "764e02b9-6f64-4d8e-a432-ff7876868187",
+        "nome": "GTA San Andreas ",
+        "descricao": "fauwnfqwefbqrefbwrhfgbw0qrg",
+        "genero": "Multiplayer",
+        "categoria": "Aventura",
+        "classificacao": "10 anos",
+        "ano": 1999,
+        "capa": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ9HxpVA2wlnIDN7gF5u9nvBHae0miGNid-Nj3bjW-hgw&s=10"
+    },
+    {
+        "id": "19d7953a-68fa-495d-b548-33ca73583484",
+        "nome": "julio",
+        "descricao": "fauwnfqwefbqrefbwrhfgbw0qrg",
+        "genero": "Battle Royale",
+        "categoria": "RPG",
+        "classificacao": "10 anos",
+        "ano": 1999,
+        "capa": "https://m.media-amazon.com/images/M/MV5BYWVjODZjNDgtYjk4ZS00OTg5LTg5NDQtZDMxZDQ4ZmM5MGJmXkEyXkFqcGc@._V1_.jpg"
+    },
+    {
+        "id": "db966861-788b-4ead-9ac9-eac1dac2df57",
+        "nome": "julio",
+        "descricao": "Jogo de ação e mundo aberto com missões, gangues, exploração livre e grande variedade de veículos e atividades.",
+        "genero": "Multiplayer",
+        "categoria": "Terror",
+        "classificacao": "10 anos",
+        "ano": 1999,
+        "capa": "https://m.media-amazon.com/images/M/MV5BYWVjODZjNDgtYjk4ZS00OTg5LTg5NDQtZDMxZDQ4ZmM5MGJmXkEyXkFqcGc@._V1_.jpg"
+    },
+    {
+        "id": "6b25a05d-adf1-47fa-b476-8ff50be30f42",
+        "nome": "GTA San Andreas ",
+        "descricao": "Jogo de ação e mundo aberto com missões, gangues, exploração livre e grande variedade de veículos e atividades.",
+        "genero": "Singleplayer",
+        "categoria": "Aventura",
+        "classificacao": "10 anos",
+        "ano": 1999,
+        "capa": "https://m.media-amazon.com/images/M/MV5BYWVjODZjNDgtYjk4ZS00OTg5LTg5NDQtZDMxZDQ4ZmM5MGJmXkEyXkFqcGc@._V1_.jpg"
+    }
+]
