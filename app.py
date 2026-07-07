@@ -7,6 +7,22 @@ from datetime import datetime
 
 CLASSIFICACOES = ['Livre', '10 anos', '12 anos', '14 anos', '16 anos', '18 anos']
 
+JOGOS_POR_PAGINA_PADRAO = 8
+OPCOES_POR_PAGINA = {2, 4, 6, 8}
+
+def obter_jogos_por_pagina():
+    valor = request.cookies.get('jogos_por_pagina')
+
+    try:
+        valor = int(valor)
+    except (TypeError, ValueError):
+        return JOGOS_POR_PAGINA_PADRAO
+
+    if valor in OPCOES_POR_PAGINA:
+        return valor
+
+    return JOGOS_POR_PAGINA_PADRAO
+
 app = Flask(__name__)
 app.secret_key = 'gameverse_secret_key'
      
@@ -108,15 +124,34 @@ def index():
 
         jogos_filtrados.append(jogo)
 
-    ano_atual = datetime.now().year 
+    ano_atual = datetime.now().year
+
+    jogos_por_pagina = obter_jogos_por_pagina()
+
+    total_jogos = len(jogos_filtrados)
+    total_paginas = max(1, (total_jogos + jogos_por_pagina - 1) // jogos_por_pagina)
+
+    try:
+        pagina = int(request.args.get('pagina', 1))
+    except ValueError:
+        pagina = 1
+
+    pagina = max(1, min(pagina, total_paginas))
+
+    inicio = (pagina - 1) * jogos_por_pagina
+    fim = inicio + jogos_por_pagina
+    jogos_paginados = jogos_filtrados[inicio:fim]
 
     return render_template(
         'index.html',
-        jogos=jogos_filtrados,
+        jogos=jogos_paginados,
         categorias=carregar_json(CATEGORIAS_FILE),
         generos=carregar_json(GENEROS_FILE),
         classificacoes=CLASSIFICACOES,
-        ano_atual=ano_atual
+        ano_atual=ano_atual,
+        total_jogos=total_jogos,
+        pagina=pagina,
+        total_paginas=total_paginas
     )
 
 

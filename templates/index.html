@@ -62,7 +62,7 @@
 </div>
 
 <p class="subtitulo" style="margin-bottom:20px;">
-    {{ jogos|length }} jogo(s) encontrado(s)
+    {{ total_jogos }} jogo(s) encontrado(s)
 </p>
 
 <div class="grid">
@@ -120,5 +120,36 @@
 <p style="opacity:.6;grid-column:1/-1;">Nenhum jogo encontrado com esses filtros.</p>
 {% endfor %}
 </div>
+
+{% if total_paginas > 1 %}
+<nav class="paginacao">
+    {% set args_sem_pagina = request.args.to_dict() %}
+    {% set _ = args_sem_pagina.pop('pagina', None) %}
+
+    {% if pagina > 1 %}
+    <a href="{{ url_for('index', pagina=pagina-1, **args_sem_pagina) }}" class="pagina-link">‹ Anterior</a>
+    {% else %}
+    <span class="pagina-link pagina-desabilitada">‹ Anterior</span>
+    {% endif %}
+
+    <div class="pagina-numeros">
+        {% for p in range(1, total_paginas + 1) %}
+            {% if p == pagina %}
+            <span class="pagina-numero pagina-atual">{{ p }}</span>
+            {% elif p == 1 or p == total_paginas or (p >= pagina - 1 and p <= pagina + 1) %}
+            <a href="{{ url_for('index', pagina=p, **args_sem_pagina) }}" class="pagina-numero">{{ p }}</a>
+            {% elif p == pagina - 2 or p == pagina + 2 %}
+            <span class="pagina-numero pagina-reticencias">…</span>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    {% if pagina < total_paginas %}
+    <a href="{{ url_for('index', pagina=pagina+1, **args_sem_pagina) }}" class="pagina-link">Próxima ›</a>
+    {% else %}
+    <span class="pagina-link pagina-desabilitada">Próxima ›</span>
+    {% endif %}
+</nav>
+{% endif %}
 
 {% endblock %}
