@@ -69,28 +69,6 @@ def salvar_json(arquivo, dados):
     with open(arquivo, 'w', encoding='utf-8') as f:
         json.dump(dados, f, ensure_ascii=False, indent=4)
 
-"""
-def salvar_capa(arquivo, url=None):
-
-    if arquivo and arquivo.filename and allowed_file(arquivo.filename):
-
-        filename = secure_filename(arquivo.filename)
-
-        ext = filename.rsplit('.', 1)[1].lower()
-
-        nome_arquivo = f"{uuid.uuid4()}.{ext}"
-
-        caminho = UPLOAD_FOLDER / nome_arquivo
-
-        arquivo.save(caminho)
-
-        return f"uploads/{nome_arquivo}"
-
-    if url:
-        return url.strip()
-
-    return None
-"""
 
 @app.route('/')
 def index():
