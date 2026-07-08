@@ -7,8 +7,8 @@ from datetime import datetime
 
 CLASSIFICACOES = ['Livre', '10 anos', '12 anos', '14 anos', '16 anos', '18 anos']
 
-JOGOS_POR_PAGINA_PADRAO = 8
-OPCOES_POR_PAGINA = {2, 4, 6, 8}
+JOGOS_POR_PAGINA_PADRAO = 12
+OPCOES_POR_PAGINA = {2, 4, 6, 12}
 
 def obter_jogos_por_pagina():
     valor = request.cookies.get('jogos_por_pagina')

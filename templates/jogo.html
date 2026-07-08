@@ -4,7 +4,7 @@
 <div class="topo">
     <h1>{{ jogo.nome }}</h1>
     <div class="topo-acoes">
-        <a href="{{ url_for('index') }}" class="btn">← Voltar</a>
+        <a href="{{ url_for('index') }}" class="btn" style="background: rgba(255,255,255,0.15);">← Voltar</a>
         <a href="{{ url_for('editar', id=jogo.id) }}" class="btn btn-editar">✏️ Editar</a>
         <form method="POST" action="{{ url_for('deletar', id=jogo.id) }}" onsubmit="return confirm('Tem certeza que deseja deletar este jogo?')">
             <input type="hidden" name="_method" value="DELETE">
@@ -13,36 +13,26 @@
     </div>
 </div>
 
-<div class="painel" style="display:flex;gap:30px;align-items:flex-start;flex-wrap:wrap;">
+<div class="jogo-detalhes-container">
 
     {% if jogo.capa %}
-
-    <div class="jogo-capa-container">
-
-        {% if jogo.capa.startswith('http') %}
-
-            <img src="{{ jogo.capa }}"
-                alt="Capa de {{ jogo.nome }}"
-                class="jogo-capa">
-
+        <div class="jogo-capa-container">
+            {% if jogo.capa.startswith('http') %}
+                <img src="{{ jogo.capa }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
+            {% else %}
+                <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
+            {% endif %}
+        </div>
     {% else %}
-
-        <img src="{{ url_for('static', filename=jogo.capa) }}"
-             alt="Capa de {{ jogo.nome }}"
-             class="jogo-capa">
-
+        <div class="jogo-capa-placeholder">🎮</div>
     {% endif %}
 
-</div>
-
-{% endif %}
-
-    <div style="flex:1;min-width:200px;">
-        <p style="margin-bottom:12px;"><strong>Descrição:</strong> {{ jogo.descricao }}</p>
-        <p style="margin-bottom:12px;"><strong>Gênero:</strong> {{ jogo.genero }}</p>
-        <p style="margin-bottom:12px;"><strong>Categoria:</strong> {{ jogo.categoria }}</p>
-        <p style="margin-bottom:12px;"><strong>Classificação:</strong> {{ jogo.classificacao }}</p>
-        <p style="margin-bottom:12px;"><strong>Ano:</strong> {{ jogo.ano }}</p>
+    <div class="jogo-detalhes-info">
+        <p><strong>Descrição:</strong> {{ jogo.descricao }}</p>
+        <p><strong>Gênero:</strong> {{ jogo.genero }}</p>
+        <p><strong>Categoria:</strong> {{ jogo.categoria }}</p>
+        <p><strong>Classificação:</strong> {{ jogo.classificacao }}</p>
+        <p><strong>Ano:</strong> {{ jogo.ano }}</p>
     </div>
 
 </div>

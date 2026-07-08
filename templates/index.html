@@ -71,50 +71,32 @@
     <a href="{{ url_for('jogo', id=jogo.id) }}" style="text-decoration:none;color:inherit;">
         <div class="card">
             <div class="card-capa-container">
-
                 {% if jogo.capa %}
-                <div class="card-capa-container">
                     {% if jogo.capa.startswith('http') %}
-
-                        <img src="{{ jogo.capa }}"
-                            alt="Capa de {{ jogo.nome }}"
-                            class="card-capa">
-
+                        <img src="{{ jogo.capa }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
+                    {% else %}
+                        <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
+                    {% endif %}
                 {% else %}
-
-                    <img src="{{ url_for('static', filename=jogo.capa) }}"
-                        alt="Capa de {{ jogo.nome }}"
-                        class="card-capa">
-
+                    <div class="card-capa-placeholder">🎮</div>
                 {% endif %}
-
             </div>
-
-            {% else %}
-
-            <div class="card-capa-placeholder">🎮</div>
-
-            {% endif %}
             
-            </div>
             <div class="card-top">
                 <span class="tag">{{ jogo.genero }}</span>
                 <span class="ano">{{ jogo.ano }}</span>
             </div>
-            <h2>{{ jogo.nome }}</h2>
-            <p class="descricao">{{ jogo.descricao }}</p>
+            
+            <h2>{{ jogo.nome | truncate(25, true, "...") }}</h2>
+            
+            <p class="descricao">{{ jogo.descricao | truncate(90, true, "...") }}</p>
+            
             <div class="infos">
                 <span>{{ jogo.categoria }}</span>
                 <span>{{ jogo.classificacao }}</span>
             </div>
         </div>
     </a>
-    <div class="card-acoes">
-        <a href="{{ url_for('editar', id=jogo.id) }}" class="btn-card btn-card-editar">✏️ Editar</a>
-        <form method="POST" action="{{ url_for('deletar', id=jogo.id) }}" onsubmit="return confirm('Deletar {{ jogo.nome }}?')">
-            <button type="submit" class="btn-card btn-card-deletar">🗑️ Deletar</button>
-        </form>
-    </div>
 </div>
 {% else %}
 <p style="opacity:.6;grid-column:1/-1;">Nenhum jogo encontrado com esses filtros.</p>
