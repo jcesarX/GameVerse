@@ -1,290 +1,200 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-import json
-import uuid
-from pathlib import Path
-from werkzeug.utils import secure_filename
 from datetime import datetime
 
-CLASSIFICACOES = ['Livre', '10 anos', '12 anos', '14 anos', '16 anos', '18 anos']
+import config
+import model
+from utils import salvar_capa
 
-JOGOS_POR_PAGINA_PADRAO = 12
-OPCOES_POR_PAGINA = {2, 4, 6, 12}
+app = Flask(__name__)
+app.secret_key = config.SECRET_KEY
+
 
 def obter_jogos_por_pagina():
-    valor = request.cookies.get('jogos_por_pagina')
+    valor = request.cookies.get("jogos_por_pagina")
 
     try:
         valor = int(valor)
     except (TypeError, ValueError):
-        return JOGOS_POR_PAGINA_PADRAO
+        return config.JOGOS_POR_PAGINA_PADRAO
 
-    if valor in OPCOES_POR_PAGINA:
+    if valor in config.OPCOES_POR_PAGINA:
         return valor
 
-    return JOGOS_POR_PAGINA_PADRAO
-
-app = Flask(__name__)
-app.secret_key = 'gameverse_secret_key'
-     
-BASE_DIR = Path(__file__).parent
-
-JOGOS_FILE = BASE_DIR / 'jogos.json'
-CATEGORIAS_FILE = BASE_DIR / 'categorias.json'
-GENEROS_FILE = BASE_DIR / 'generos.json'
-
-UPLOAD_FOLDER = BASE_DIR / 'static' / 'uploads'
-UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
-
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-
-def allowed_file(filename):
-    return (
-        '.' in filename and
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-    )
+    return config.JOGOS_POR_PAGINA_PADRAO
 
 
-def carregar_json(arquivo):
-
-    if not arquivo.exists():
-        with open(arquivo, 'w', encoding='utf-8') as f:
-            json.dump([], f, ensure_ascii=False, indent=4)
-
-        return []
-
-    try:
-        with open(arquivo, 'r', encoding='utf-8') as f:
-            conteudo = f.read().strip()
-
-            if not conteudo:
-                return []
-
-            return json.loads(conteudo)
-
-    except (json.JSONDecodeError, FileNotFoundError):
-        return []
-
-
-def salvar_json(arquivo, dados):
-    with open(arquivo, 'w', encoding='utf-8') as f:
-        json.dump(dados, f, ensure_ascii=False, indent=4)
-
-
-@app.route('/')
+@app.route("/")
 def index():
 
-    jogos = carregar_json(JOGOS_FILE)
+    nome = request.args.get("nome", "").lower()
+    genero = request.args.get("genero", "").lower()
+    categoria = request.args.get("categoria", "").lower()
+    classificacao = request.args.get("classificacao", "").lower()
+    ano = request.args.get("ano", "")
 
-    nome = request.args.get('nome', '').lower()
-    genero = request.args.get('genero', '').lower()
-    categoria = request.args.get('categoria', '').lower()
-    classificacao = request.args.get('classificacao', '').lower()
-    ano = request.args.get('ano', '')
-
-    jogos_filtrados = []
-
-    for jogo in jogos:
-
-        if nome and nome not in jogo['nome'].lower():
-            continue
-
-        if genero and genero not in jogo['genero'].lower():
-            continue
-
-        if categoria and categoria not in jogo['categoria'].lower():
-            continue
-
-        if classificacao and classificacao not in jogo['classificacao'].lower():
-            continue
-
-        if ano and str(jogo['ano']) != ano:
-            continue
-
-        jogos_filtrados.append(jogo)
-
-    ano_atual = datetime.now().year
+    jogos_filtrados = model.filtrar_jogos(
+        nome,
+        genero,
+        categoria,
+        classificacao,
+        ano
+    )
 
     jogos_por_pagina = obter_jogos_por_pagina()
 
-    total_jogos = len(jogos_filtrados)
-    total_paginas = max(1, (total_jogos + jogos_por_pagina - 1) // jogos_por_pagina)
-
     try:
-        pagina = int(request.args.get('pagina', 1))
+        pagina = int(request.args.get("pagina", 1))
     except ValueError:
         pagina = 1
 
-    pagina = max(1, min(pagina, total_paginas))
-
-    inicio = (pagina - 1) * jogos_por_pagina
-    fim = inicio + jogos_por_pagina
-    jogos_paginados = jogos_filtrados[inicio:fim]
+    resultado = model.paginar_jogos(
+        jogos_filtrados,
+        pagina,
+        jogos_por_pagina
+    )
 
     return render_template(
-        'index.html',
-        jogos=jogos_paginados,
-        categorias=carregar_json(CATEGORIAS_FILE),
-        generos=carregar_json(GENEROS_FILE),
-        classificacoes=CLASSIFICACOES,
-        ano_atual=ano_atual,
-        total_jogos=total_jogos,
-        pagina=pagina,
-        total_paginas=total_paginas
+        "index.html",
+        jogos=resultado["jogos"],
+        categorias=model.listar_categorias(),
+        generos=model.listar_generos(),
+        classificacoes=config.CLASSIFICACOES,
+        ano_atual=datetime.now().year,
+        total_jogos=resultado["total_jogos"],
+        pagina=resultado["pagina"],
+        total_paginas=resultado["total_paginas"]
     )
 
 
-@app.route('/jogo/<string:id>')
+@app.route("/jogo/<string:id>")
 def jogo(id):
 
-    jogos = carregar_json(JOGOS_FILE)
-
-    jogo_encontrado = next(
-        (j for j in jogos if j['id'] == id),
-        None
-    )
-
-    if not jogo_encontrado:
-        return redirect(url_for('index'))
-
-    return render_template(
-        'jogo.html',
-        jogo=jogo_encontrado
-    )
-
-
-@app.route('/cadastrar', methods=['GET', 'POST'])
-def cadastrar():
-
-    if request.method == 'POST':
-
-        jogos = carregar_json(JOGOS_FILE)
-
-        # arquivo = request.files.get("capa")
-
-        url = request.form.get("capa_url")
-
-        #capa = salvar_capa(arquivo, url)
-
-        capa = url.strip() if url else None
-
-        ano  = int(request.form['ano'])
-        
-        if ano < 1970 or ano > datetime.now().year:
-            flash(
-                f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
-            return redirect(url_for('cadastrar'))
-        
-        novo_jogo = {
-            "id": str(uuid.uuid4()),
-            "nome": request.form['nome'],
-            "descricao": request.form['descricao'],
-            "genero": request.form['genero'],
-            "categoria": request.form['categoria'],
-            "classificacao": request.form['classificacao'],
-            "ano": ano,
-            "capa": capa
-        }
-
-        jogos.append(novo_jogo)
-
-        salvar_json(JOGOS_FILE, jogos)
-
-        return redirect(url_for('index'))
-
-    return render_template(
-        'cadastrar.html',
-        categorias=carregar_json(CATEGORIAS_FILE),
-        generos=carregar_json(GENEROS_FILE),
-        classificacoes=CLASSIFICACOES
-    )
-
-
-@app.route('/editar/<string:id>', methods=['GET', 'POST'])
-def editar(id):
-
-    jogos = carregar_json(JOGOS_FILE)
-
-    jogo = next(
-        (j for j in jogos if j['id'] == id),
-        None
-    )
+    jogo = model.buscar_jogo(id)
 
     if not jogo:
-        return redirect(url_for('index'))
+        return redirect(url_for("index"))
 
-    if request.method == 'POST':
+    return render_template(
+        "jogo.html",
+        jogo=jogo
+    )
 
-        # arquivo = request.files.get("capa")
 
+@app.route("/cadastrar", methods=["GET", "POST"])
+def cadastrar():
+
+    if request.method == "POST":
+
+        arquivo = request.files.get("capa")
         url = request.form.get("capa_url")
 
-        # nova_capa = salvar_capa(arquivo, url)
-        nova_capa = url.strip() if url else None
+        capa = salvar_capa(arquivo, url)
 
-        if nova_capa:
+        ano = int(request.form["ano"])
+
+        if ano < 1970 or ano > datetime.now().year:
+            flash(
+                f"O ano deve estar entre 1970 e {datetime.now().year}.",
+                "error"
+            )
+            return redirect(url_for("cadastrar"))
+
+        novo_jogo = model.criar_jogo(
+            request.form["nome"],
+            request.form["descricao"],
+            request.form["genero"],
+            request.form["categoria"],
+            request.form["classificacao"],
+            ano,
+            capa
+        )
+
+        model.adicionar_jogo(novo_jogo)
+
+        return redirect(url_for("index"))
+
+    return render_template(
+        "cadastrar.html",
+        categorias=model.listar_categorias(),
+        generos=model.listar_generos(),
+        classificacoes=config.CLASSIFICACOES
+    )
+
+
+@app.route("/editar/<string:id>", methods=["GET", "POST"])
+def editar(id):
+
+    jogo = model.buscar_jogo(id)
+
+    if not jogo:
+        return redirect(url_for("index"))
+
+    if request.method == "POST":
+
+        arquivo = request.files.get("capa")
+        url = request.form.get("capa_url")
+
+        nova_capa = salvar_capa(arquivo, url)
+
+        if nova_capa is not None:
 
             if jogo.get("capa") and not jogo["capa"].startswith("http"):
 
-                capa_antiga = BASE_DIR / "static" / jogo["capa"]
+                capa_antiga = config.BASE_DIR / "static" / jogo["capa"]
 
                 if capa_antiga.exists():
                     capa_antiga.unlink()
 
-            jogo['capa'] = nova_capa
-
-        jogo['nome'] = request.form['nome']
-        jogo['descricao'] = request.form['descricao']
-        jogo['genero'] = request.form['genero']
-        jogo['categoria'] = request.form['categoria']
-        jogo['classificacao'] = request.form['classificacao']
-        ano = int(request.form['ano'])
+        ano = int(request.form["ano"])
 
         if ano < 1970 or ano > datetime.now().year:
             flash(
-                f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
-            return redirect(url_for('editar', id=id))
+                f"O ano deve estar entre 1970 e {datetime.now().year}.",
+                "error"
+            )
+            return redirect(url_for("editar", id=id))
 
-        jogo['ano'] = ano
+        model.editar_jogo(
+            jogo,
+            request.form["nome"],
+            request.form["descricao"],
+            request.form["genero"],
+            request.form["categoria"],
+            request.form["classificacao"],
+            ano,
+            nova_capa
+        )
 
-        salvar_json(JOGOS_FILE, jogos)
+        return redirect(url_for("jogo", id=id))
 
-        return redirect(url_for('jogo', id=id))
-
-    ano_atual = datetime.now().year
     return render_template(
-        'editar.html',
+        "editar.html",
         jogo=jogo,
-        categorias=carregar_json(CATEGORIAS_FILE),
-        generos=carregar_json(GENEROS_FILE),
-        classificacoes=CLASSIFICACOES,
-        ano_atual=ano_atual
+        categorias=model.listar_categorias(),
+        generos=model.listar_generos(),
+        classificacoes=config.CLASSIFICACOES,
+        ano_atual=datetime.now().year
     )
 
 
-@app.route('/deletar/<string:id>', methods=['POST'])
+@app.route("/deletar/<string:id>", methods=["POST"])
 def deletar(id):
 
-    jogos = carregar_json(JOGOS_FILE)
-
-    jogo = next(
-        (j for j in jogos if j['id'] == id),
-        None
-    )
+    jogo = model.buscar_jogo(id)
 
     if jogo:
 
-        """if jogo.get("capa") and not jogo["capa"].startswith("http"):
+        if jogo.get("capa") and not jogo["capa"].startswith("http"):
 
-            capa_path = BASE_DIR / "static" / jogo["capa"]
+            capa = config.BASE_DIR / "static" / jogo["capa"]
 
-            if capa_path.exists():
-                capa_path.unlink()"""
+            if capa.exists():
+                capa.unlink()
 
-        jogos = [j for j in jogos if j['id'] != id]
+        model.excluir_jogo(id)
 
-        salvar_json(JOGOS_FILE, jogos)
+    return redirect(url_for("index"))
 
-    return redirect(url_for('index'))
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
