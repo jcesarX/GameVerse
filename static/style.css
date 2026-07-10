@@ -80,11 +80,10 @@ button{
 }
 
 .grid{
-    display:grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap:25px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, 300px);
+    gap: 5px;
     justify-content: start;
-    width: 100%;
 }
 
 .card{
@@ -96,7 +95,7 @@ button{
     backdrop-filter:blur(8px);
     position:relative;
     overflow:hidden;
-    width: 100%;
+    width: 300px;
 }
 
 .card::before{
