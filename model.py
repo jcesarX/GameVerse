@@ -1,90 +1,369 @@
-import json
 import uuid
+import psycopg2
+import psycopg2.extras
+from psycopg2 import sql
 
-from config import (
-    JOGOS_FILE,
-    GENEROS_FILE,
-    CATEGORIAS_FILE
-)
+HOST = "localhost"
+PORT = "5432"
+DB_NAME = "gameverse"
+USER = "postgres"
+PASSWORD = "postgres"
 
+# CONEXÃO
 
-# ==========================
-# Leitura e escrita dos JSON
-# ==========================
+def criar_banco():
 
-def carregar_json(arquivo):
+    conn = psycopg2.connect(
+        host=HOST,
+        port=PORT,
+        dbname="postgres",
+        user=USER,
+        password=PASSWORD
+    )
 
-    if not arquivo.exists():
+    conn.autocommit = True
 
-        with open(arquivo, "w", encoding="utf-8") as f:
-            json.dump([], f, ensure_ascii=False, indent=4)
+    cur = conn.cursor()
 
-        return []
+    cur.execute(
+        "SELECT 1 FROM pg_database WHERE datname = %s",
+        (DB_NAME,)
+    )
 
-    try:
+    if cur.fetchone() is None:
 
-        with open(arquivo, "r", encoding="utf-8") as f:
+        cur.execute(
+            sql.SQL(
+                "CREATE DATABASE {}"
+            ).format(
+                sql.Identifier(DB_NAME)
+            )
+        )
 
-            conteudo = f.read().strip()
+        print("Banco criado com sucesso!")
 
-            if not conteudo:
-                return []
+    else:
 
-            return json.loads(conteudo)
+        print("Banco já existe.")
 
-    except (json.JSONDecodeError, FileNotFoundError):
-        return []
-
-
-def salvar_json(arquivo, dados):
-
-    with open(arquivo, "w", encoding="utf-8") as f:
-        json.dump(dados, f, ensure_ascii=False, indent=4)
-
-
-# ==========================
-# Listagens
-# ==========================
-
-def listar_jogos():
-    return carregar_json(JOGOS_FILE)
-
-
-def listar_generos():
-    return carregar_json(GENEROS_FILE)
+    cur.close()
+    conn.close()
 
 
-def listar_categorias():
-    return carregar_json(CATEGORIAS_FILE)
+def get_conn():
 
-
-def salvar_jogos(jogos):
-    salvar_json(JOGOS_FILE, jogos)
-
-
-# ==========================
-# Busca
-# ==========================
-
-def buscar_jogo(id):
-
-    jogos = listar_jogos()
-
-    return next(
-        (j for j in jogos if j["id"] == id),
-        None
+    return psycopg2.connect(
+        host=HOST,
+        port=PORT,
+        dbname=DB_NAME,
+        user=USER,
+        password=PASSWORD
     )
 
 
-# ==========================
-# CRUD
-# ==========================
+# CRIAÇÃO DAS TABELAS
+
+def criar_tabelas():
+
+    conn = get_conn()
+
+    cur = conn.cursor()
+
+    # GÊNERO
+
+    cur.execute("""
+
+        CREATE TABLE IF NOT EXISTS genero(
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(50)
+            UNIQUE NOT NULL
+
+        );
+
+    """)
+
+    # CATEGORIA
+
+    cur.execute("""
+
+        CREATE TABLE IF NOT EXISTS categoria(
+            id SERIAL PRIMARY KEY,
+            nome VARCHAR(50)
+            UNIQUE NOT NULL
+
+        );
+
+    """)
+
+    # JOGO
+
+    cur.execute("""
+
+        CREATE TABLE IF NOT EXISTS jogo(
+            id UUID PRIMARY KEY,
+            nome VARCHAR(100)
+            NOT NULL,
+            descricao TEXT
+            NOT NULL,
+            classificacao VARCHAR(10)
+            NOT NULL,
+            ano INTEGER
+            NOT NULL,
+            capa TEXT,
+            genero_id INTEGER
+            NOT NULL,
+            categoria_id INTEGER
+            NOT NULL,
+            FOREIGN KEY(genero_id)
+                REFERENCES genero(id),
+            FOREIGN KEY(categoria_id)
+                REFERENCES categoria(id)
+        );
+
+    """)
+
+    # INSERÇÃO DE DADOS INICIAIS
+
+    cur.executemany(
+
+        """
+        INSERT INTO genero(nome)
+        VALUES(%s)
+
+        ON CONFLICT(nome)
+        DO NOTHING
+
+        """,
+
+        [
+            ("Ação",),
+            ("Aventura",),
+            ("RPG",),
+            ("Estratégia",),
+            ("Corrida",),
+            ("Esporte",),
+            ("FPS",),
+            ("Luta",),
+            ("Terror",),
+            ("Simulação",),
+            ("Puzzle",)
+        ]
+    )
+
+    cur.executemany(
+
+        """
+
+        INSERT INTO categoria(nome)
+        VALUES(%s)
+
+        ON CONFLICT(nome)
+        DO NOTHING
+
+        """,
+
+        [
+            ("Singleplayer",),
+            ("Multiplayer",),
+            ("Cooperativo",),
+            ("Online",),
+            ("Competitivo",)
+        ]
+
+    )
+
+    conn.commit()
+
+    cur.close()
+
+    conn.close()
+
+
+def listar_generos():
+
+    conn = get_conn()
+
+    cur = conn.cursor(
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
+
+    cur.execute("""
+
+        SELECT *
+
+        FROM genero
+
+        ORDER BY nome
+
+    """)
+
+    generos = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return generos
+
+
+
+def listar_categorias():
+
+    conn = get_conn()
+
+    cur = conn.cursor(
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
+
+    cur.execute("""
+
+        SELECT *
+        FROM categoria
+        ORDER BY nome
+
+    """)
+
+    categorias = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return categorias
+
+
+
+def listar_jogos():
+
+    conn = get_conn()
+
+    cur = conn.cursor(
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
+
+    cur.execute("""
+
+        SELECT
+            j.id,
+            j.nome,
+            j.descricao,
+            j.classificacao,
+            j.ano,
+            j.capa,
+            g.nome AS genero,
+            c.nome AS categoria,
+            j.genero_id,
+            j.categoria_id
+                
+        FROM jogo j
+        INNER JOIN genero g
+            ON j.genero_id = g.id
+        INNER JOIN categoria c
+            ON j.categoria_id = c.id
+        ORDER BY j.nome
+    """)
+
+    jogos = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return jogos
+
+
+
+def buscar_jogo(id):
+
+    conn = get_conn()
+
+    cur = conn.cursor(
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
+
+    cur.execute("""
+
+        SELECT
+            j.id,
+            j.nome,
+            j.descricao,
+            j.classificacao,
+            j.ano,
+            j.capa,
+            g.nome AS genero,
+            c.nome AS categoria,
+            j.genero_id,
+            j.categoria_id
+
+        FROM jogo j
+        INNER JOIN genero g
+            ON j.genero_id = g.id
+        INNER JOIN categoria c
+            ON j.categoria_id = c.id
+        WHERE j.id = %s
+
+    """,
+
+    (id,))
+
+    jogo = cur.fetchone()
+
+    cur.close()
+
+    conn.close()
+
+    return jogo
+
+
+#CRUD
+
+def adicionar_jogo(jogo):
+
+    conn = get_conn()
+
+    cur = conn.cursor()
+
+    cur.execute("""
+
+        INSERT INTO jogo(
+            id,
+            nome,
+            descricao,
+            classificacao,
+            ano,
+            capa,
+            genero_id,
+            categoria_id
+        )
+
+        VALUES(
+
+            %s,%s,%s,%s,%s,%s,%s,%s
+
+        )
+
+    """,
+
+    (
+        jogo["id"],
+        jogo["nome"],
+        jogo["descricao"],
+        jogo["classificacao"],
+        jogo["ano"],
+        jogo["capa"],
+        jogo["genero_id"],
+        jogo["categoria_id"]
+    ))
+
+    conn.commit()
+
+    cur.close()
+
+    conn.close()
+
 
 def criar_jogo(
     nome,
     descricao,
-    genero,
-    categoria,
+    genero_id,
+    categoria_id,
     classificacao,
     ano,
     capa
@@ -94,73 +373,100 @@ def criar_jogo(
         "id": str(uuid.uuid4()),
         "nome": nome,
         "descricao": descricao,
-        "genero": genero,
-        "categoria": categoria,
+        "genero_id": int(genero_id),
+        "categoria_id": int(categoria_id),
         "classificacao": classificacao,
         "ano": ano,
         "capa": capa
     }
 
 
-def adicionar_jogo(jogo):
-
-    jogos = listar_jogos()
-
-    jogos.append(jogo)
-
-    salvar_jogos(jogos)
-
-
-def atualizar_jogo(jogo_atualizado):
-
-    jogos = listar_jogos()
-
-    for i, jogo in enumerate(jogos):
-
-        if jogo["id"] == jogo_atualizado["id"]:
-
-            jogos[i] = jogo_atualizado
-            break
-
-    salvar_jogos(jogos)
-
 
 def editar_jogo(
     jogo,
     nome,
     descricao,
-    genero,
-    categoria,
+    genero_id,
+    categoria_id,
     classificacao,
     ano,
     capa
+
 ):
 
-    jogo["nome"] = nome
-    jogo["descricao"] = descricao
-    jogo["genero"] = genero
-    jogo["categoria"] = categoria
-    jogo["classificacao"] = classificacao
-    jogo["ano"] = ano
+    conn = get_conn()
 
-    if capa is not None:
-        jogo["capa"] = capa
+    cur = conn.cursor()
 
-    atualizar_jogo(jogo)
+    if capa is None:
+
+        capa = jogo["capa"]
+
+    cur.execute("""
+
+        UPDATE jogo
+
+        SET
+            nome=%s,
+            descricao=%s,
+            classificacao=%s,
+            ano=%s,
+            capa=%s,
+            genero_id=%s,
+            categoria_id=%s
+
+        WHERE id=%s
+
+    """,
+
+    (
+        nome,
+        descricao,
+        classificacao,
+        ano,
+        capa,
+        int(genero_id),
+        int(categoria_id),
+        jogo["id"]
+    ))
+
+    conn.commit()
+
+    cur.close()
+
+    conn.close()
+
 
 
 def excluir_jogo(id):
 
-    jogos = listar_jogos()
+    conn = get_conn()
 
-    jogos = [j for j in jogos if j["id"] != id]
+    cur = conn.cursor()
 
-    salvar_jogos(jogos)
+    cur.execute(
+
+        """
+
+        DELETE
+        FROM jogo
+        WHERE id=%s
+
+        """,
+
+        (id,)
+
+    )
+
+    conn.commit()
+
+    cur.close()
+
+    conn.close()
 
 
-# ==========================
-# Filtros
-# ==========================
+
+#Filtros e paginação
 
 def filtrar_jogos(
     nome="",
@@ -170,35 +476,71 @@ def filtrar_jogos(
     ano=""
 ):
 
-    jogos = listar_jogos()
+    conn = get_conn()
 
-    jogos_filtrados = []
+    cur = conn.cursor(
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
 
-    for jogo in jogos:
+    sql = """
 
-        if nome and nome not in jogo["nome"].lower():
-            continue
+        SELECT
+            j.id,
+            j.nome,
+            j.descricao,
+            j.classificacao,
+            j.ano,
+            j.capa,
+            g.nome AS genero,
+            c.nome AS categoria,
+            j.genero_id,
+            j.categoria_id
 
-        if genero and genero not in jogo["genero"].lower():
-            continue
+        FROM jogo j
 
-        if categoria and categoria not in jogo["categoria"].lower():
-            continue
+        INNER JOIN genero g
+            ON j.genero_id = g.id
+        INNER JOIN categoria c
+            ON j.categoria_id = c.id
+        WHERE TRUE
 
-        if classificacao and classificacao not in jogo["classificacao"].lower():
-            continue
+    """
 
-        if ano and str(jogo["ano"]) != str(ano):
-            continue
+    parametros = []
 
-        jogos_filtrados.append(jogo)
+    if nome:
+        sql += " AND LOWER(j.nome) LIKE %s"
+        parametros.append(f"%{nome.lower()}%")
 
-    return jogos_filtrados
+    if genero:
+        sql += " AND LOWER(g.nome) LIKE %s"
+        parametros.append(f"%{genero.lower()}%")
 
+    if categoria:
+        sql += " AND LOWER(c.nome) LIKE %s"
+        parametros.append(f"%{categoria.lower()}%")
 
-# ==========================
-# Paginação
-# ==========================
+    if classificacao:
+        sql += " AND LOWER(j.classificacao) LIKE %s"
+        parametros.append(f"%{classificacao.lower()}%")
+
+    if ano:
+
+        sql += " AND j.ano = %s"
+
+        parametros.append(int(ano))
+
+    sql += " ORDER BY j.nome"
+
+    cur.execute(sql, parametros)
+
+    jogos = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return jogos
+
 
 def paginar_jogos(jogos, pagina, por_pagina):
 
@@ -215,6 +557,7 @@ def paginar_jogos(jogos, pagina, por_pagina):
     )
 
     inicio = (pagina - 1) * por_pagina
+
     fim = inicio + por_pagina
 
     jogos_paginados = jogos[inicio:fim]
@@ -225,3 +568,8 @@ def paginar_jogos(jogos, pagina, por_pagina):
         "total_paginas": total_paginas,
         "total_jogos": total_jogos
     }
+
+
+
+criar_banco()
+criar_tabelas()

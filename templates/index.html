@@ -4,7 +4,7 @@
 
 <div class="topo">
     <div>
-        <h1>🎮 GameVerse</h1>
+        <h1>GameVerse</h1>
     </div>
     <a href="{{ url_for('cadastrar') }}" class="btn">+ Cadastrar Jogo</a>
 </div>
@@ -23,14 +23,14 @@
             <select name="genero">
                 <option value="">Todos os gêneros</option>
                 {% for g in generos %}
-                <option value="{{ g }}" {% if request.args.get('genero') == g %}selected{% endif %}>{{ g }}</option>
+                <option value="{{ g.nome }}" {% if request.args.get('genero') == g.nome %}selected{% endif %}>{{ g.nome }}</option>
                 {% endfor %}
             </select>
 
             <select name="categoria">
                 <option value="">Todas as categorias</option>
                 {% for c in categorias %}
-                <option value="{{ c }}" {% if request.args.get('categoria') == c %}selected{% endif %}>{{ c }}</option>
+                <option value="{{ c.nome }}" {% if request.args.get('categoria') == c.nome %}selected{% endif %}>{{ c.nome }}</option>
                 {% endfor %}
             </select>
 

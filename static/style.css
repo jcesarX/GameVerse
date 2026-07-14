@@ -10,7 +10,7 @@ body{
     font-family: Arial, sans-serif;
     min-height:100vh;
     padding:30px;
-    overflow-x: hidden; /* Evita rolagem horizontal indesejada */
+    overflow-x: hidden; 
 }
 
 .topo{
@@ -82,7 +82,7 @@ button{
 .grid{
     display: grid;
     grid-template-columns: repeat(auto-fill, 300px);
-    gap: 5px;
+    gap: 8px;
     justify-content: start;
 }
 

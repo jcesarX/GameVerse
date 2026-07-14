@@ -1,6 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
-
 import config
 import model
 from utils import salvar_capa
@@ -102,8 +101,8 @@ def cadastrar():
         novo_jogo = model.criar_jogo(
             request.form["nome"],
             request.form["descricao"],
-            request.form["genero"],
-            request.form["categoria"],
+            request.form["genero_id"],
+            request.form["categoria_id"],
             request.form["classificacao"],
             ano,
             capa
@@ -158,8 +157,8 @@ def editar(id):
             jogo,
             request.form["nome"],
             request.form["descricao"],
-            request.form["genero"],
-            request.form["categoria"],
+            request.form["genero_id"],
+            request.form["categoria_id"],
             request.form["classificacao"],
             ano,
             nova_capa
@@ -196,5 +195,9 @@ def deletar(id):
     return redirect(url_for("index"))
 
 
+model.criar_banco()
+model.criar_tabelas()
+
 if __name__ == "__main__":
     app.run(debug=True)
+

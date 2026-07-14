@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="topo">
-    <h1>✏️ Editar Jogo</h1>
+    <h1>Editar Jogo</h1>
     <a href="{{ url_for('jogo', id=jogo.id) }}" class="btn">← Voltar</a>
 </div>
 
@@ -14,17 +14,17 @@
 
         <input type="text" name="descricao" placeholder="Descrição do jogo" value="{{ jogo.descricao }}" required>
 
-        <select name="genero" required>
+        <select name="genero_id" required>
             <option value="">Selecione um gênero</option>
             {% for genero in generos %}
-            <option value="{{ genero }}" {% if jogo.genero == genero %}selected{% endif %}>{{ genero }}</option>
+            <option value="{{ genero.id }}" {% if jogo.genero_id == genero.id %}selected{% endif %}>{{ genero.nome }}</option>
             {% endfor %}
         </select>
 
-        <select name="categoria" required>
+        <select name="categoria_id" required>
             <option value="">Selecione uma categoria</option>
             {% for categoria in categorias %}
-            <option value="{{ categoria }}" {% if jogo.categoria == categoria %}selected{% endif %}>{{ categoria }}</option>
+            <option value="{{ categoria.id }}" {% if jogo.categoria_id == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
             {% endfor %}
         </select>
 

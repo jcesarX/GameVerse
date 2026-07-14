@@ -1,72 +1,157 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="topo">
-    <h1>➕ Cadastrar Novo Jogo</h1>
+
+    <h1>Cadastrar Novo Jogo</h1>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
+
         {% if messages %}
+
             {% for category, message in messages %}
-                <div class="flash {{category}}">
+
+                <div class="flash {{ category }}">
+
                     {{ message }}
+
                 </div>
+
             {% endfor %}
+
         {% endif %}
+
     {% endwith %}
-    <a href="{{ url_for('index') }}" class="btn">← Voltar</a>
+
+    <a href="{{ url_for('index') }}" class="btn">
+
+        ← Voltar
+
+    </a>
+
 </div>
 
 <div class="painel">
+
     <form method="POST" enctype="multipart/form-data" class="cadastro-form">
 
-        <input type="text" name="nome" placeholder="Nome do jogo" required>
+        <input
+            type="text"
+            name="nome"
+            placeholder="Nome do jogo"
+            required
+        >
 
-        <input type="text" name="descricao" placeholder="Descrição do jogo" required>
+        <input
+            type="text"
+            name="descricao"
+            placeholder="Descrição do jogo"
+            required
+        >
 
-        <select name="genero" required>
-            <option value="">Selecione um gênero</option>
+        <select name="genero_id" required>
+
+            <option value="">
+                Selecione um gênero
+            </option>
+
             {% for genero in generos %}
-            <option value="{{ genero }}">{{ genero }}</option>
+
+                <option value="{{ genero.id }}">
+
+                    {{ genero.nome }}
+
+                </option>
+
             {% endfor %}
+
         </select>
 
-        <select name="categoria" required>
-            <option value="">Selecione uma categoria</option>
+        <select name="categoria_id" required>
+
+            <option value="">
+                Selecione uma categoria
+            </option>
+
             {% for categoria in categorias %}
-            <option value="{{ categoria }}">{{ categoria }}</option>
+
+                <option value="{{ categoria.id }}">
+
+                    {{ categoria.nome }}
+
+                </option>
+
             {% endfor %}
+
         </select>
 
         <select name="classificacao" required>
-            <option value="">Selecione a classificação</option>
+
+            <option value="">
+                Selecione a classificação
+            </option>
+
             {% for classificacao in classificacoes %}
-            <option value="{{ classificacao }}">{{ classificacao }}</option>
+
+                <option value="{{ classificacao }}">
+
+                    {{ classificacao }}
+
+                </option>
+
             {% endfor %}
+
         </select>
 
+
         <input
-        type="text"
-        name="ano"
-        placeholder="Ano de lançamento"
-        value="{{ jogo.ano if jogo else '' }}"
-        inputmode="numeric"
-        maxlength="4"
-        pattern="[0-9]{4}"
-        oninput="this.value = this.value.replace(/\D/g, '')"
-        required>
-        
-        <!--<label class="label-capa">
-            🖼️ Imagem de Capa 
-            <input type="file" name="capa" accept="image/*">
-        </label>-->
-        <label for="capa_url">informe a URL da imagem (Opcional)</label>
+            type="text"
+            name="ano"
+            placeholder="Ano de lançamento"
+            inputmode="numeric"
+            maxlength="4"
+            pattern="[0-9]{4}"
+            oninput="this.value = this.value.replace(/\D/g, '')"
+            required
+        >
+
+        <!-- CAPA -->
+
+        <!--
+        <label class="label-capa">
+
+            Imagem de capa
+
+            <input
+                type="file"
+                name="capa"
+                accept="image/*">
+
+        </label>
+        -->
+
+        <label for="capa_url">
+
+            Informe a URL da imagem (Opcional)
+
+        </label>
+
         <input
             type="url"
             id="capa_url"
             name="capa_url"
-            placeholder="https://site.com/imagem.jpg">
+            placeholder="https://site.com/imagem.jpg"
+        >
 
-        <button type="submit">Cadastrar Jogo</button>
+        <button type="submit">
+
+            Cadastrar Jogo
+
+        </button>
 
     </form>
+
 </div>
+
 {% endblock %}
