@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from datetime import datetime
 import config
 import model
-from utils import salvar_capa
+from utils import salvar_capa, validar_url_imagem
 
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
@@ -81,22 +81,28 @@ def jogo(id):
 
 @app.route("/cadastrar", methods=["GET", "POST"])
 def cadastrar():
-
     if request.method == "POST":
-
         arquivo = request.files.get("capa")
         url = request.form.get("capa_url")
 
-        capa = salvar_capa(arquivo, url)
+        # Valida a URL, se fornecida
+        if url and url.strip():
+            if not validar_url_imagem(url):  # agora a função está importada diretamente
+                flash("A URL fornecida não é uma imagem válida.", "error")
+                return redirect(url_for("cadastrar"))
 
-        ano = int(request.form["ano"])
+        # Obtém e valida o ano
+        try:
+            ano = int(request.form["ano"])
+        except ValueError:
+            flash("Ano inválido. Digite um número.", "error")
+            return redirect(url_for("cadastrar"))
 
         if ano < 1970 or ano > datetime.now().year:
-            flash(
-                f"O ano deve estar entre 1970 e {datetime.now().year}.",
-                "error"
-            )
+            flash(f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
             return redirect(url_for("cadastrar"))
+
+        capa = salvar_capa(arquivo, url)
 
         novo_jogo = model.criar_jogo(
             request.form["nome"],
@@ -104,12 +110,11 @@ def cadastrar():
             request.form["genero_id"],
             request.form["categoria_id"],
             request.form["classificacao"],
-            ano,
+            ano,          # agora é um inteiro válido
             capa
         )
 
         model.adicionar_jogo(novo_jogo)
-
         return redirect(url_for("index"))
 
     return render_template(
@@ -122,36 +127,39 @@ def cadastrar():
 
 @app.route("/editar/<string:id>", methods=["GET", "POST"])
 def editar(id):
-
     jogo = model.buscar_jogo(id)
-
     if not jogo:
         return redirect(url_for("index"))
 
     if request.method == "POST":
-
         arquivo = request.files.get("capa")
         url = request.form.get("capa_url")
 
-        nova_capa = salvar_capa(arquivo, url)
+        # Valida a URL se foi fornecida
+        if url and url.strip():
+            if not validar_url_imagem(url):
+                flash("A URL fornecida não é uma imagem válida.", "error")
+                return redirect(url_for("editar", id=id))
 
-        if nova_capa is not None:
-
-            if jogo.get("capa") and not jogo["capa"].startswith("http"):
-
-                capa_antiga = config.BASE_DIR / "static" / jogo["capa"]
-
-                if capa_antiga.exists():
-                    capa_antiga.unlink()
-
-        ano = int(request.form["ano"])
+        # Obtém e valida o ano
+        try:
+            ano = int(request.form["ano"])
+        except ValueError:
+            flash("Ano inválido. Digite um número.", "error")
+            return redirect(url_for("editar", id=id))
 
         if ano < 1970 or ano > datetime.now().year:
-            flash(
-                f"O ano deve estar entre 1970 e {datetime.now().year}.",
-                "error"
-            )
+            flash(f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
             return redirect(url_for("editar", id=id))
+
+        nova_capa = salvar_capa(arquivo, url)
+
+        # Remove a capa antiga se for arquivo local e nova capa foi enviada
+        if nova_capa is not None:
+            if jogo.get("capa") and not jogo["capa"].startswith("http"):
+                capa_antiga = config.BASE_DIR / "static" / jogo["capa"]
+                if capa_antiga.exists():
+                    capa_antiga.unlink()
 
         model.editar_jogo(
             jogo,
@@ -160,7 +168,7 @@ def editar(id):
             request.form["genero_id"],
             request.form["categoria_id"],
             request.form["classificacao"],
-            ano,
+            ano,          # agora definido e validado
             nova_capa
         )
 
