@@ -10,28 +10,28 @@
     <form method="POST" enctype="multipart/form-data" class="cadastro-form">
         <input type="hidden" name="_method" value="PUT">
 
-        <input type="text" name="nome" placeholder="Nome do jogo" value="{{ jogo.nome }}" required>
+        <input type="text" name="nome" placeholder="Nome do jogo" value="{{ dados.get('nome', jogo.nome) }}" required>
 
-        <input type="text" name="descricao" placeholder="Descrição do jogo" value="{{ jogo.descricao }}" required>
+        <input type="text" name="descricao" placeholder="Descrição do jogo" value="{{ dados.get('descricao', jogo.descricao) }}" required>
 
         <select name="genero_id" required>
             <option value="">Selecione um gênero</option>
             {% for genero in generos %}
-            <option value="{{ genero.id }}" {% if jogo.genero_id == genero.id %}selected{% endif %}>{{ genero.nome }}</option>
+            <option value="{{ genero.id }}" {% if dados.get('genero_id')|int(jogo.genero_id) == genero.id %}selected{% endif %}>{{ genero.nome }}</option>
             {% endfor %}
         </select>
 
         <select name="categoria_id" required>
             <option value="">Selecione uma categoria</option>
             {% for categoria in categorias %}
-            <option value="{{ categoria.id }}" {% if jogo.categoria_id == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
+            <option value="{{ categoria.id }}" {% if dados.get('categoria_id')|int(jogo.categoria_id) == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
             {% endfor %}
         </select>
 
         <select name="classificacao" required>
             <option value="">Selecione a classificação</option>
             {% for classificacao in classificacoes %}
-            <option value="{{ classificacao }}" {% if jogo.classificacao == classificacao %}selected{% endif %}>{{ classificacao }}</option>
+            <option value="{{ classificacao }}" {% if dados.get('classificacao', jogo.classificacao) == classificacao %}selected{% endif %}>{{ classificacao }}</option>
             {% endfor %}
         </select>
 
@@ -39,23 +39,23 @@
         type="number"
         name="ano"
         placeholder="Ano de lançamento"
-        value="{{ jogo.ano }}"
+        value="{{ dados.get('ano', jogo.ano) }}"
         min="1970"
         max="{{ ano_atual }}"
         step="1"
         oninput="if(this.value.length > 4) this.value = this.value.slice(0,4)"
         required>
         
-        {% if jogo.capa %}
+        {% if jogo.url_capa %}
 
-            {% if jogo.capa.startswith('http') %}
+            {% if jogo.url_capa.startswith('http') %}
 
-                <img src="{{ jogo.capa }}"
+                <img src="{{ jogo.url_capa }}"
                     class="capa-preview">
 
         {% else %}
 
-            <img src="{{ url_for('static', filename=jogo.capa) }}"
+            <img src="{{ url_for('static', filename=jogo.url_capa) }}"
                 class="capa-preview">
 
         {% endif %}
@@ -63,7 +63,7 @@
 {% endif %}
 
         <!--<label class="label-capa">
-            🖼️ Nova Imagem de Capa
+            Nova Imagem de Capa
             <input type="file" name="capa" accept="image/*">
         </label>-->
         <label for="capa_url">Informe a URL da nova imagem (opcional — substitui a atual)
@@ -72,7 +72,8 @@
             type="url"
             id="capa_url"
             name="capa_url"
-            placeholder="https://site.com/imagem.jpg">
+            placeholder="https://site.com/imagem.jpg"
+            value="{{ dados.get('capa_url', '') }}">
 
         <button type="submit">Salvar Alterações</button>
     </form>

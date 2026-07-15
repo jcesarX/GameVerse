@@ -5,26 +5,26 @@
     <h1>{{ jogo.nome }}</h1>
     <div class="topo-acoes">
         <a href="{{ url_for('index') }}" class="btn" style="background: rgba(255,255,255,0.15);">← Voltar</a>
-        <a href="{{ url_for('editar', id=jogo.id) }}" class="btn btn-editar">✏️ Editar</a>
+        <a href="{{ url_for('editar', id=jogo.id) }}" class="btn btn-editar">Editar</a>
         <form method="POST" action="{{ url_for('deletar', id=jogo.id) }}" onsubmit="return confirm('Tem certeza que deseja deletar este jogo?')">
             <input type="hidden" name="_method" value="DELETE">
-            <button type="submit" class="btn btn-deletar">🗑️ Deletar</button>
+            <button type="submit" class="btn btn-deletar">Deletar</button>
         </form>
     </div>
 </div>
 
 <div class="jogo-detalhes-container">
 
-    {% if jogo.capa %}
+    {% if jogo.url_capa %}
         <div class="jogo-capa-container">
-            {% if jogo.capa.startswith('http') %}
-                <img src="{{ jogo.capa }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
+            {% if jogo.url_capa.startswith('http') %}
+                <img src="{{ jogo.url_capa }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
             {% else %}
-                <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
+                <img src="{{ url_for('static', filename=jogo.url_capa) }}" alt="Capa de {{ jogo.nome }}" class="jogo-capa">
             {% endif %}
         </div>
     {% else %}
-        <div class="jogo-capa-placeholder">🎮</div>
+        <div class="jogo-capa-placeholder">Sem imagem</div>
     {% endif %}
 
     <div class="jogo-detalhes-info">

@@ -11,10 +11,6 @@ def allowed_file(filename):
     )
 
 def validar_url_imagem(url):
-    """
-    Verifica se a URL é acessível e retorna uma imagem.
-    Retorna True se for uma imagem válida, False caso contrário.
-    """
     try:
         response = requests.head(url, timeout=5)
         content_type = response.headers.get('Content-Type', '')

@@ -109,7 +109,7 @@ def criar_tabelas():
             NOT NULL,
             ano INTEGER
             NOT NULL,
-            capa TEXT,
+            url_capa TEXT,
             genero_id INTEGER
             NOT NULL,
             categoria_id INTEGER
@@ -119,6 +119,22 @@ def criar_tabelas():
             FOREIGN KEY(categoria_id)
                 REFERENCES categoria(id)
         );
+
+    """)
+
+    # MIGRAÇÃO: bancos criados antes da renomeação do atributo "capa"
+    # para "url_capa" ainda têm a coluna com o nome antigo.
+    cur.execute("""
+
+        DO $$
+        BEGIN
+            IF EXISTS (
+                SELECT 1 FROM information_schema.columns
+                WHERE table_name = 'jogo' AND column_name = 'capa'
+            ) THEN
+                ALTER TABLE jogo RENAME COLUMN capa TO url_capa;
+            END IF;
+        END $$;
 
     """)
 
@@ -247,7 +263,7 @@ def listar_jogos():
             j.descricao,
             j.classificacao,
             j.ano,
-            j.capa,
+            j.url_capa,
             g.nome AS genero,
             c.nome AS categoria,
             j.genero_id,
@@ -286,7 +302,7 @@ def buscar_jogo(id):
             j.descricao,
             j.classificacao,
             j.ano,
-            j.capa,
+            j.url_capa,
             g.nome AS genero,
             c.nome AS categoria,
             j.genero_id,
@@ -328,7 +344,7 @@ def adicionar_jogo(jogo):
             descricao,
             classificacao,
             ano,
-            capa,
+            url_capa,
             genero_id,
             categoria_id
         )
@@ -347,7 +363,7 @@ def adicionar_jogo(jogo):
         jogo["descricao"],
         jogo["classificacao"],
         jogo["ano"],
-        jogo["capa"],
+        jogo["url_capa"],
         jogo["genero_id"],
         jogo["categoria_id"]
     ))
@@ -366,7 +382,7 @@ def criar_jogo(
     categoria_id,
     classificacao,
     ano,
-    capa
+    url_capa
 ):
 
     return {
@@ -377,7 +393,7 @@ def criar_jogo(
         "categoria_id": int(categoria_id),
         "classificacao": classificacao,
         "ano": ano,
-        "capa": capa
+        "url_capa": url_capa
     }
 
 
@@ -390,7 +406,7 @@ def editar_jogo(
     categoria_id,
     classificacao,
     ano,
-    capa
+    url_capa
 
 ):
 
@@ -398,9 +414,9 @@ def editar_jogo(
 
     cur = conn.cursor()
 
-    if capa is None:
+    if url_capa is None:
 
-        capa = jogo["capa"]
+        url_capa = jogo["url_capa"]
 
     cur.execute("""
 
@@ -411,7 +427,7 @@ def editar_jogo(
             descricao=%s,
             classificacao=%s,
             ano=%s,
-            capa=%s,
+            url_capa=%s,
             genero_id=%s,
             categoria_id=%s
 
@@ -424,7 +440,7 @@ def editar_jogo(
         descricao,
         classificacao,
         ano,
-        capa,
+        url_capa,
         int(genero_id),
         int(categoria_id),
         jogo["id"]
@@ -490,7 +506,7 @@ def filtrar_jogos(
             j.descricao,
             j.classificacao,
             j.ano,
-            j.capa,
+            j.url_capa,
             g.nome AS genero,
             c.nome AS categoria,
             j.genero_id,

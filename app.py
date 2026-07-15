@@ -87,22 +87,40 @@ def cadastrar():
 
         # Valida a URL, se fornecida
         if url and url.strip():
-            if not validar_url_imagem(url):  # agora a função está importada diretamente
+            if not validar_url_imagem(url):
                 flash("A URL fornecida não é uma imagem válida.", "error")
-                return redirect(url_for("cadastrar"))
+                return render_template(
+                    "cadastrar.html",
+                    categorias=model.listar_categorias(),
+                    generos=model.listar_generos(),
+                    classificacoes=config.CLASSIFICACOES,
+                    dados=request.form
+                )
 
         # Obtém e valida o ano
         try:
             ano = int(request.form["ano"])
         except ValueError:
             flash("Ano inválido. Digite um número.", "error")
-            return redirect(url_for("cadastrar"))
+            return render_template(
+                "cadastrar.html",
+                categorias=model.listar_categorias(),
+                generos=model.listar_generos(),
+                classificacoes=config.CLASSIFICACOES,
+                dados=request.form
+            )
 
         if ano < 1970 or ano > datetime.now().year:
             flash(f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
-            return redirect(url_for("cadastrar"))
+            return render_template(
+                "cadastrar.html",
+                categorias=model.listar_categorias(),
+                generos=model.listar_generos(),
+                classificacoes=config.CLASSIFICACOES,
+                dados=request.form
+            )
 
-        capa = salvar_capa(arquivo, url)
+        url_capa = salvar_capa(arquivo, url)
 
         novo_jogo = model.criar_jogo(
             request.form["nome"],
@@ -110,8 +128,8 @@ def cadastrar():
             request.form["genero_id"],
             request.form["categoria_id"],
             request.form["classificacao"],
-            ano,          # agora é um inteiro válido
-            capa
+            ano,
+            url_capa
         )
 
         model.adicionar_jogo(novo_jogo)
@@ -121,7 +139,8 @@ def cadastrar():
         "cadastrar.html",
         categorias=model.listar_categorias(),
         generos=model.listar_generos(),
-        classificacoes=config.CLASSIFICACOES
+        classificacoes=config.CLASSIFICACOES,
+        dados={}
     )
 
 
@@ -135,29 +154,52 @@ def editar(id):
         arquivo = request.files.get("capa")
         url = request.form.get("capa_url")
 
-        # Valida a URL se foi fornecida
+        # Valida a URL, se fornecida
         if url and url.strip():
             if not validar_url_imagem(url):
                 flash("A URL fornecida não é uma imagem válida.", "error")
-                return redirect(url_for("editar", id=id))
+                return render_template(
+                    "editar.html",
+                    jogo=jogo,
+                    categorias=model.listar_categorias(),
+                    generos=model.listar_generos(),
+                    classificacoes=config.CLASSIFICACOES,
+                    ano_atual=datetime.now().year,
+                    dados=request.form
+                )
 
         # Obtém e valida o ano
         try:
             ano = int(request.form["ano"])
         except ValueError:
             flash("Ano inválido. Digite um número.", "error")
-            return redirect(url_for("editar", id=id))
+            return render_template(
+                "editar.html",
+                jogo=jogo,
+                categorias=model.listar_categorias(),
+                generos=model.listar_generos(),
+                classificacoes=config.CLASSIFICACOES,
+                ano_atual=datetime.now().year,
+                dados=request.form
+            )
 
         if ano < 1970 or ano > datetime.now().year:
             flash(f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
-            return redirect(url_for("editar", id=id))
+            return render_template(
+                "editar.html",
+                jogo=jogo,
+                categorias=model.listar_categorias(),
+                generos=model.listar_generos(),
+                classificacoes=config.CLASSIFICACOES,
+                ano_atual=datetime.now().year,
+                dados=request.form
+            )
 
-        nova_capa = salvar_capa(arquivo, url)
+        nova_url_capa = salvar_capa(arquivo, url)
 
-        # Remove a capa antiga se for arquivo local e nova capa foi enviada
-        if nova_capa is not None:
-            if jogo.get("capa") and not jogo["capa"].startswith("http"):
-                capa_antiga = config.BASE_DIR / "static" / jogo["capa"]
+        if nova_url_capa is not None:
+            if jogo.get("url_capa") and not jogo["url_capa"].startswith("http"):
+                capa_antiga = config.BASE_DIR / "static" / jogo["url_capa"]
                 if capa_antiga.exists():
                     capa_antiga.unlink()
 
@@ -168,8 +210,8 @@ def editar(id):
             request.form["genero_id"],
             request.form["categoria_id"],
             request.form["classificacao"],
-            ano,          # agora definido e validado
-            nova_capa
+            ano,
+            nova_url_capa
         )
 
         return redirect(url_for("jogo", id=id))
@@ -180,6 +222,7 @@ def editar(id):
         categorias=model.listar_categorias(),
         generos=model.listar_generos(),
         classificacoes=config.CLASSIFICACOES,
+        dados={},
         ano_atual=datetime.now().year
     )
 
@@ -191,9 +234,9 @@ def deletar(id):
 
     if jogo:
 
-        if jogo.get("capa") and not jogo["capa"].startswith("http"):
+        if jogo.get("url_capa") and not jogo["url_capa"].startswith("http"):
 
-            capa = config.BASE_DIR / "static" / jogo["capa"]
+            capa = config.BASE_DIR / "static" / jogo["url_capa"]
 
             if capa.exists():
                 capa.unlink()

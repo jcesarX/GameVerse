@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS jogo(
     descricao TEXT NOT NULL,
     classificacao VARCHAR(10) NOT NULL,
     ano INTEGER NOT NULL,
-    capa TEXT,
+    url_capa TEXT,
     genero_id INTEGER NOT NULL,
     categoria_id INTEGER NOT NULL,
     FOREIGN KEY(genero_id) REFERENCES genero(id),
@@ -68,7 +68,7 @@ ON CONFLICT(nome) DO NOTHING;
 -- DADOS INICIAIS - JOGOS
 -- ============================================
 
-INSERT INTO jogo(id, nome, descricao, classificacao, ano, capa, genero_id, categoria_id)
+INSERT INTO jogo(id, nome, descricao, classificacao, ano, url_capa, genero_id, categoria_id)
 VALUES
     (
         'bbfbf2c7-4c89-40c8-a543-8fd6f9f70bc7',

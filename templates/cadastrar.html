@@ -6,24 +6,6 @@
 
     <h1>Cadastrar Novo Jogo</h1>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-
-        {% if messages %}
-
-            {% for category, message in messages %}
-
-                <div class="flash {{ category }}">
-
-                    {{ message }}
-
-                </div>
-
-            {% endfor %}
-
-        {% endif %}
-
-    {% endwith %}
-
     <a href="{{ url_for('index') }}" class="btn">
 
         ← Voltar
@@ -40,6 +22,7 @@
             type="text"
             name="nome"
             placeholder="Nome do jogo"
+            value="{{dados.get('nome', '') }}"
             required
         >
 
@@ -47,6 +30,7 @@
             type="text"
             name="descricao"
             placeholder="Descrição do jogo"
+            value="{{ dados.get('descricao', '') }}"
             required
         >
 
@@ -58,7 +42,8 @@
 
             {% for genero in generos %}
 
-                <option value="{{ genero.id }}">
+                <option value="{{ genero.id }}" 
+                {% if dados.get('genero_id')|int == genero.id %}selected{% endif %}>
 
                     {{ genero.nome }}
 
@@ -76,7 +61,8 @@
 
             {% for categoria in categorias %}
 
-                <option value="{{ categoria.id }}">
+                <option value="{{ categoria.id }}" 
+                {% if dados.get('categoria_id')|int == categoria.id %}selected{% endif %}>
 
                     {{ categoria.nome }}
 
@@ -94,7 +80,8 @@
 
             {% for classificacao in classificacoes %}
 
-                <option value="{{ classificacao }}">
+                <option value="{{ classificacao }}" 
+                {% if dados.get('classificacao') == classificacao %}selected{% endif %}>
 
                     {{ classificacao }}
 
@@ -109,6 +96,7 @@
             type="text"
             name="ano"
             placeholder="Ano de lançamento"
+            value="{{dados.get('ano', '') }}"
             inputmode="numeric"
             maxlength="4"
             pattern="[0-9]{4}"
@@ -142,6 +130,7 @@
             id="capa_url"
             name="capa_url"
             placeholder="https://site.com/imagem.jpg"
+            value="{{ dados.get('capa_url', '') }}"
         >
 
         <button type="submit">

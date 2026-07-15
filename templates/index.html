@@ -15,7 +15,7 @@
             <input
                 type="text"
                 name="nome"
-                placeholder="🔍 Pesquisar por nome..."
+                placeholder="Pesquisar por nome..."
                 value="{{ request.args.get('nome', '') }}"
                 autocomplete="off"
             >
@@ -55,7 +55,7 @@
             <button type="submit">Filtrar</button>
 
             {% if request.args %}
-            <a href="/" class="btn" style="text-align:center;padding:14px;">✕ Limpar</a>
+            <a href="/" class="btn" style="text-align:center;padding:14px;">Limpar seleção</a>
             {% endif %}
         </div>
     </form>
@@ -71,14 +71,14 @@
     <a href="{{ url_for('jogo', id=jogo.id) }}" style="text-decoration:none;color:inherit;">
         <div class="card">
             <div class="card-capa-container">
-                {% if jogo.capa %}
-                    {% if jogo.capa.startswith('http') %}
-                        <img src="{{ jogo.capa }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
+                {% if jogo.url_capa %}
+                    {% if jogo.url_capa.startswith('http') %}
+                        <img src="{{ jogo.url_capa }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
                     {% else %}
-                        <img src="{{ url_for('static', filename=jogo.capa) }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
+                        <img src="{{ url_for('static', filename=jogo.url_capa) }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
                     {% endif %}
                 {% else %}
-                    <div class="card-capa-placeholder">🎮</div>
+                    <div class="card-capa-placeholder">Sem imagem</div>
                 {% endif %}
             </div>
             
