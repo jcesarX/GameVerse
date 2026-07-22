@@ -62,7 +62,11 @@
 </div>
 
 <p class="subtitulo" style="margin-bottom:20px;">
-    {{ total_jogos }} jogo(s) encontrado(s)
+    {% if total_jogos == 1 %}
+    1 jogo encontrado
+    {% else %}
+    {{ total_jogos }} jogos encontrados
+    {% endif %}
 </p>
 
 <div class="grid">

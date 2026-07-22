@@ -18,23 +18,26 @@
 
     <form method="POST" enctype="multipart/form-data" class="cadastro-form">
 
+        <label for="nome">Nome do jogo</label>
         <input
             type="text"
+            id="nome"
             name="nome"
             placeholder="Nome do jogo"
             value="{{dados.get('nome', '') }}"
             required
         >
 
-        <input
-            type="text"
+        <label for="descricao">Descrição do jogo</label>
+        <textarea
+            id="descricao"
             name="descricao"
             placeholder="Descrição do jogo"
-            value="{{ dados.get('descricao', '') }}"
             required
-        >
+        >{{ dados.get('descricao', '') }}</textarea>
 
-        <select name="genero_id" required>
+        <label for="genero_id">Gênero</label>
+        <select id="genero_id" name="genero_id" required>
 
             <option value="">
                 Selecione um gênero
@@ -53,7 +56,8 @@
 
         </select>
 
-        <select name="categoria_id" required>
+        <label for="categoria_id">Categoria</label>
+        <select id="categoria_id" name="categoria_id" required>
 
             <option value="">
                 Selecione uma categoria
@@ -72,7 +76,8 @@
 
         </select>
 
-        <select name="classificacao" required>
+        <label for="classificacao">Classificação</label>
+        <select id="classificacao" name="classificacao" required>
 
             <option value="">
                 Selecione a classificação
@@ -91,9 +96,10 @@
 
         </select>
 
-
+        <label for="ano">Ano de lançamento</label>
         <input
             type="text"
+            id="ano"
             name="ano"
             placeholder="Ano de lançamento"
             value="{{dados.get('ano', '') }}"

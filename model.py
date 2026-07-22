@@ -542,9 +542,14 @@ def filtrar_jogos(
 
     if ano:
 
-        sql += " AND j.ano = %s"
+        try:
+            ano_int = int(ano)
+        except (TypeError, ValueError):
+            ano_int = None
 
-        parametros.append(int(ano))
+        if ano_int is not None:
+            sql += " AND j.ano = %s"
+            parametros.append(ano_int)
 
     sql += " ORDER BY j.nome"
 

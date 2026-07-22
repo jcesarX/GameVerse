@@ -31,6 +31,13 @@ def index():
     classificacao = request.args.get("classificacao", "").lower()
     ano = request.args.get("ano", "")
 
+    if ano:
+        try:
+            int(ano)
+        except ValueError:
+            flash("Ano inválido. O filtro de ano foi ignorado.", "error")
+            ano = ""
+
     jogos_filtrados = model.filtrar_jogos(
         nome,
         genero,
