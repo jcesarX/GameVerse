@@ -18,7 +18,8 @@ def criar_banco():
         port=PORT,
         dbname="postgres",
         user=USER,
-        password=PASSWORD
+        password=PASSWORD,
+        client_encoding="utf8"
     )
 
     conn.autocommit = True
@@ -57,7 +58,8 @@ def get_conn():
         port=PORT,
         dbname=DB_NAME,
         user=USER,
-        password=PASSWORD
+        password=PASSWORD,
+        client_encoding="utf8"
     )
 
 
