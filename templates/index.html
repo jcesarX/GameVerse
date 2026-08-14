@@ -2,16 +2,16 @@
 
 {% block content %}
 
-<div class="topo">
-    <div>
-        <h1>GameVerse</h1>
-    </div>
-    <a href="{{ url_for('cadastrar') }}" class="btn">+ Cadastrar Jogo</a>
+<div class="hero">
+    <h1 class="titulo-central titulo-principal">GameVerse</h1>
+    <p class="hero-subtitulo">Encontre, cadastre e organize sua coleção de jogos.</p>
 </div>
 
-<div class="painel">
-    <form method="GET" action="/">
-        <div class="filtros">
+<form method="GET" action="/" class="form-busca">
+
+    <div class="barra-acoes">
+        <div class="campo-busca">
+            <span class="icone-busca">⌕</span>
             <input
                 type="text"
                 name="nome"
@@ -19,123 +19,84 @@
                 value="{{ request.args.get('nome', '') }}"
                 autocomplete="off"
             >
+        </div>
 
-            <select name="genero">
+        <button type="button" id="abrir-filtros" class="btn btn-secundario">
+            <span class="icone-filtro">▤</span> Filtros
+            {% if request.args.get('genero') or request.args.get('categoria') or request.args.get('classificacao') or request.args.get('ano') %}
+            <span class="badge-ativo"></span>
+            {% endif %}
+        </button>
+
+        <button
+            type="button"
+            class="btn btn-cadastrar abrir-painel-formulario"
+            data-url="{{ url_for('cadastrar') }}"
+        >+ Cadastrar Jogo</button>
+    </div>
+
+    <aside id="sidebar-filtros" class="painel-lateral">
+
+        <div class="sidebar-topo">
+            <span class="painel-titulo">Filtros</span>
+            <button type="button" id="fechar-filtros" class="link-voltar">← Voltar</button>
+        </div>
+
+        <div class="campo">
+            <label for="filtro-genero">Gênero</label>
+            <select id="filtro-genero" name="genero">
                 <option value="">Todos os gêneros</option>
                 {% for g in generos %}
                 <option value="{{ g.nome }}" {% if request.args.get('genero') == g.nome %}selected{% endif %}>{{ g.nome }}</option>
                 {% endfor %}
             </select>
+        </div>
 
-            <select name="categoria">
+        <div class="campo">
+            <label for="filtro-categoria">Categoria</label>
+            <select id="filtro-categoria" name="categoria">
                 <option value="">Todas as categorias</option>
                 {% for c in categorias %}
                 <option value="{{ c.nome }}" {% if request.args.get('categoria') == c.nome %}selected{% endif %}>{{ c.nome }}</option>
                 {% endfor %}
             </select>
+        </div>
 
-            <select name="classificacao">
+        <div class="campo">
+            <label for="filtro-classificacao">Classificação</label>
+            <select id="filtro-classificacao" name="classificacao">
                 <option value="">Qualquer classificação</option>
                 {% for cl in classificacoes %}
                 <option value="{{ cl }}" {% if request.args.get('classificacao') == cl %}selected{% endif %}>{{ cl }}</option>
                 {% endfor %}
             </select>
+        </div>
 
+        <div class="campo">
+            <label for="filtro-ano">Ano</label>
             <input
                 type="number"
+                id="filtro-ano"
                 name="ano"
-                placeholder="Ano (ex: 2021)"
+                placeholder="Ex: 2021"
                 value="{{ request.args.get('ano', '') }}"
                 min="1970"
-                max="{{ ano_atual}}"
+                max="{{ ano_atual }}"
                 step="1"
                 oninput="if(this.value.length > 4) this.value = this.value.slice(0,4)"
             >
-
-            <button type="submit">Filtrar</button>
-
-            {% if request.args %}
-            <a href="/" class="btn" style="text-align:center;padding:14px;">Limpar seleção</a>
-            {% endif %}
         </div>
-    </form>
-</div>
 
-<p class="subtitulo" style="margin-bottom:20px;">
-    {% if total_jogos == 1 %}
-    1 jogo encontrado
-    {% else %}
-    {{ total_jogos }} jogos encontrados
-    {% endif %}
-</p>
+        <button type="submit">Aplicar filtros</button>
 
-<div class="grid">
-{% for jogo in jogos %}
-<div class="card-wrapper">
-    <a href="{{ url_for('jogo', id=jogo.id) }}" style="text-decoration:none;color:inherit;">
-        <div class="card">
-            <div class="card-capa-container">
-                {% if jogo.url_capa %}
-                    {% if jogo.url_capa.startswith('http') %}
-                        <img src="{{ jogo.url_capa }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
-                    {% else %}
-                        <img src="{{ url_for('static', filename=jogo.url_capa) }}" alt="Capa de {{ jogo.nome }}" class="card-capa">
-                    {% endif %}
-                {% else %}
-                    <div class="card-capa-placeholder">Sem imagem</div>
-                {% endif %}
-            </div>
-            
-            <div class="card-top">
-                <span class="tag">{{ jogo.genero }}</span>
-                <span class="ano">{{ jogo.ano }}</span>
-            </div>
-            
-            <h2>{{ jogo.nome | truncate(25, true, "...") }}</h2>
-            
-            <p class="descricao">{{ jogo.descricao | truncate(90, true, "...") }}</p>
-            
-            <div class="infos">
-                <span>{{ jogo.categoria }}</span>
-                <span>{{ jogo.classificacao }}</span>
-            </div>
-        </div>
-    </a>
-</div>
-{% else %}
-<p style="opacity:.6;grid-column:1/-1;">Nenhum jogo encontrado com esses filtros.</p>
-{% endfor %}
-</div>
+        {% if request.args %}
+        <a href="/" class="limpar-link">Limpar filtros</a>
+        {% endif %}
 
-{% if total_paginas > 1 %}
-<nav class="paginacao">
-    {% set args_sem_pagina = request.args.to_dict() %}
-    {% set _ = args_sem_pagina.pop('pagina', None) %}
+    </aside>
 
-    {% if pagina > 1 %}
-    <a href="{{ url_for('index', pagina=pagina-1, **args_sem_pagina) }}" class="pagina-link">‹ Anterior</a>
-    {% else %}
-    <span class="pagina-link pagina-desabilitada">‹ Anterior</span>
-    {% endif %}
+</form>
 
-    <div class="pagina-numeros">
-        {% for p in range(1, total_paginas + 1) %}
-            {% if p == pagina %}
-            <span class="pagina-numero pagina-atual">{{ p }}</span>
-            {% elif p == 1 or p == total_paginas or (p >= pagina - 1 and p <= pagina + 1) %}
-            <a href="{{ url_for('index', pagina=p, **args_sem_pagina) }}" class="pagina-numero">{{ p }}</a>
-            {% elif p == pagina - 2 or p == pagina + 2 %}
-            <span class="pagina-numero pagina-reticencias">…</span>
-            {% endif %}
-        {% endfor %}
-    </div>
-
-    {% if pagina < total_paginas %}
-    <a href="{{ url_for('index', pagina=pagina+1, **args_sem_pagina) }}" class="pagina-link">Próxima ›</a>
-    {% else %}
-    <span class="pagina-link pagina-desabilitada">Próxima ›</span>
-    {% endif %}
-</nav>
-{% endif %}
+{% include "_resultados.html" %}
 
 {% endblock %}

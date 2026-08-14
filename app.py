@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from datetime import datetime
 import config
 import model
@@ -20,6 +20,12 @@ def obter_jogos_por_pagina():
         return valor
 
     return config.JOGOS_POR_PAGINA_PADRAO
+
+
+def eh_ajax():
+    """Identifica se a requisição veio do JS (fetch), para retornar
+    apenas o fragmento HTML/JSON necessário, sem a página inteira."""
+    return request.headers.get("X-Requested-With") == "fetch"
 
 
 @app.route("/")
@@ -59,8 +65,7 @@ def index():
         jogos_por_pagina
     )
 
-    return render_template(
-        "index.html",
+    contexto = dict(
         jogos=resultado["jogos"],
         categorias=model.listar_categorias(),
         generos=model.listar_generos(),
@@ -70,6 +75,11 @@ def index():
         pagina=resultado["pagina"],
         total_paginas=resultado["total_paginas"]
     )
+
+    if eh_ajax():
+        return render_template("_resultados.html", **contexto)
+
+    return render_template("index.html", **contexto)
 
 
 @app.route("/jogo/<string:id>")
@@ -82,8 +92,30 @@ def jogo(id):
 
     return render_template(
         "jogo.html",
-        jogo=jogo
+        jogo=jogo,
+        ano_atual=datetime.now().year
     )
+
+
+def renderizar_formulario(modo, jogo, dados, status=200):
+    """Renderiza o formulário de cadastro/edição.
+    Se a requisição vier do JS (painel), devolve só o fragmento HTML do
+    formulário. Caso contrário, devolve a página completa (fallback)."""
+    contexto = dict(
+        modo=modo,
+        jogo=jogo,
+        dados=dados,
+        categorias=model.listar_categorias(),
+        generos=model.listar_generos(),
+        classificacoes=config.CLASSIFICACOES,
+        ano_atual=datetime.now().year
+    )
+
+    if eh_ajax():
+        return render_template("_jogo_form.html", **contexto), status
+
+    pagina = "cadastrar.html" if modo == "cadastrar" else "editar.html"
+    return render_template(pagina, **contexto), status
 
 
 @app.route("/cadastrar", methods=["GET", "POST"])
@@ -96,36 +128,18 @@ def cadastrar():
         if url and url.strip():
             if not validar_url_imagem(url):
                 flash("A URL fornecida não é uma imagem válida.", "error")
-                return render_template(
-                    "cadastrar.html",
-                    categorias=model.listar_categorias(),
-                    generos=model.listar_generos(),
-                    classificacoes=config.CLASSIFICACOES,
-                    dados=request.form
-                )
+                return renderizar_formulario("cadastrar", None, request.form, status=400)
 
         # Obtém e valida o ano
         try:
             ano = int(request.form["ano"])
         except ValueError:
             flash("Ano inválido. Digite um número.", "error")
-            return render_template(
-                "cadastrar.html",
-                categorias=model.listar_categorias(),
-                generos=model.listar_generos(),
-                classificacoes=config.CLASSIFICACOES,
-                dados=request.form
-            )
+            return renderizar_formulario("cadastrar", None, request.form, status=400)
 
         if ano < 1970 or ano > datetime.now().year:
             flash(f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
-            return render_template(
-                "cadastrar.html",
-                categorias=model.listar_categorias(),
-                generos=model.listar_generos(),
-                classificacoes=config.CLASSIFICACOES,
-                dados=request.form
-            )
+            return renderizar_formulario("cadastrar", None, request.form, status=400)
 
         url_capa = salvar_capa(arquivo, url)
 
@@ -140,21 +154,21 @@ def cadastrar():
         )
 
         model.adicionar_jogo(novo_jogo)
+
+        if eh_ajax():
+            return jsonify(ok=True), 201
+
         return redirect(url_for("index"))
 
-    return render_template(
-        "cadastrar.html",
-        categorias=model.listar_categorias(),
-        generos=model.listar_generos(),
-        classificacoes=config.CLASSIFICACOES,
-        dados={}
-    )
+    return renderizar_formulario("cadastrar", None, {})
 
 
 @app.route("/editar/<string:id>", methods=["GET", "POST"])
 def editar(id):
     jogo = model.buscar_jogo(id)
     if not jogo:
+        if eh_ajax():
+            return jsonify(erro="Jogo não encontrado."), 404
         return redirect(url_for("index"))
 
     if request.method == "POST":
@@ -165,42 +179,18 @@ def editar(id):
         if url and url.strip():
             if not validar_url_imagem(url):
                 flash("A URL fornecida não é uma imagem válida.", "error")
-                return render_template(
-                    "editar.html",
-                    jogo=jogo,
-                    categorias=model.listar_categorias(),
-                    generos=model.listar_generos(),
-                    classificacoes=config.CLASSIFICACOES,
-                    ano_atual=datetime.now().year,
-                    dados=request.form
-                )
+                return renderizar_formulario("editar", jogo, request.form, status=400)
 
         # Obtém e valida o ano
         try:
             ano = int(request.form["ano"])
         except ValueError:
             flash("Ano inválido. Digite um número.", "error")
-            return render_template(
-                "editar.html",
-                jogo=jogo,
-                categorias=model.listar_categorias(),
-                generos=model.listar_generos(),
-                classificacoes=config.CLASSIFICACOES,
-                ano_atual=datetime.now().year,
-                dados=request.form
-            )
+            return renderizar_formulario("editar", jogo, request.form, status=400)
 
         if ano < 1970 or ano > datetime.now().year:
             flash(f"O ano deve estar entre 1970 e {datetime.now().year}.", "error")
-            return render_template(
-                "editar.html",
-                jogo=jogo,
-                categorias=model.listar_categorias(),
-                generos=model.listar_generos(),
-                classificacoes=config.CLASSIFICACOES,
-                ano_atual=datetime.now().year,
-                dados=request.form
-            )
+            return renderizar_formulario("editar", jogo, request.form, status=400)
 
         nova_url_capa = salvar_capa(arquivo, url)
 
@@ -221,17 +211,12 @@ def editar(id):
             nova_url_capa
         )
 
+        if eh_ajax():
+            return jsonify(ok=True), 200
+
         return redirect(url_for("jogo", id=id))
 
-    return render_template(
-        "editar.html",
-        jogo=jogo,
-        categorias=model.listar_categorias(),
-        generos=model.listar_generos(),
-        classificacoes=config.CLASSIFICACOES,
-        dados={},
-        ano_atual=datetime.now().year
-    )
+    return renderizar_formulario("editar", jogo, {})
 
 
 @app.route("/deletar/<string:id>", methods=["POST"])
@@ -257,5 +242,4 @@ model.criar_banco()
 model.criar_tabelas()
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
-
+    app.run(debug=True)

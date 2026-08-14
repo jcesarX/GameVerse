@@ -1,0 +1,115 @@
+<div class="sidebar-topo">
+    <span class="painel-titulo">{{ "Cadastrar Jogo" if modo == "cadastrar" else "Editar Jogo" }}</span>
+    <button type="button" class="link-voltar fechar-painel-formulario">← Voltar</button>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <div class="form-erro">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+<form
+    method="POST"
+    action="{{ url_for('editar', id=jogo.id) if modo == 'editar' else url_for('cadastrar') }}"
+    class="form-jogo"
+    enctype="multipart/form-data"
+>
+
+    <div class="campo">
+        <label for="campo-nome">Nome do jogo</label>
+        <input
+            type="text"
+            id="campo-nome"
+            name="nome"
+            placeholder="Nome do jogo"
+            value="{{ dados.get('nome', jogo.nome if jogo else '') }}"
+            required
+        >
+    </div>
+
+    <div class="campo">
+        <label for="campo-descricao">Descrição do jogo</label>
+        <textarea
+            id="campo-descricao"
+            name="descricao"
+            placeholder="Descrição do jogo"
+            required
+        >{{ dados.get('descricao', jogo.descricao if jogo else '') }}</textarea>
+    </div>
+
+    <div class="campo">
+        <label for="campo-genero">Gênero</label>
+        <select id="campo-genero" name="genero_id" required>
+            <option value="">Selecione um gênero</option>
+            {% for genero in generos %}
+            <option value="{{ genero.id }}" {% if dados.get('genero_id')|int(jogo.genero_id if jogo else 0) == genero.id %}selected{% endif %}>{{ genero.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="campo">
+        <label for="campo-categoria">Categoria</label>
+        <select id="campo-categoria" name="categoria_id" required>
+            <option value="">Selecione uma categoria</option>
+            {% for categoria in categorias %}
+            <option value="{{ categoria.id }}" {% if dados.get('categoria_id')|int(jogo.categoria_id if jogo else 0) == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="campo">
+        <label for="campo-classificacao">Classificação</label>
+        <select id="campo-classificacao" name="classificacao" required>
+            <option value="">Selecione a classificação</option>
+            {% for classificacao in classificacoes %}
+            <option value="{{ classificacao }}" {% if dados.get('classificacao', jogo.classificacao if jogo else '') == classificacao %}selected{% endif %}>{{ classificacao }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="campo">
+        <label for="campo-ano">Ano de lançamento</label>
+        <input
+            type="text"
+            id="campo-ano"
+            name="ano"
+            placeholder="Ano de lançamento"
+            value="{{ dados.get('ano', jogo.ano if jogo else '') }}"
+            inputmode="numeric"
+            maxlength="4"
+            pattern="[0-9]{4}"
+            oninput="this.value = this.value.replace(/\D/g, '')"
+            required
+        >
+    </div>
+
+    {% if modo == "editar" and jogo and jogo.url_capa %}
+    <div class="campo">
+        <label>Capa atual</label>
+        {% if jogo.url_capa.startswith('http') %}
+            <img src="{{ jogo.url_capa }}" class="capa-preview">
+        {% else %}
+            <img src="{{ url_for('static', filename=jogo.url_capa) }}" class="capa-preview">
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="campo">
+        <label for="campo-capa-url">
+            {{ "Informe a URL da nova imagem (opcional — substitui a atual)" if modo == "editar" else "Informe a URL da imagem (Opcional)" }}
+        </label>
+        <input
+            type="url"
+            id="campo-capa-url"
+            name="capa_url"
+            placeholder="https://site.com/imagem.jpg"
+            value="{{ dados.get('capa_url', '') }}"
+        >
+    </div>
+
+    <button type="submit">{{ "Salvar Alterações" if modo == "editar" else "Cadastrar Jogo" }}</button>
+
+</form>

@@ -1,0 +1,84 @@
+<div id="grade-resultados">
+
+    <p class="subtitulo subtitulo-central">
+        {% if total_jogos == 1 %}
+        1 jogo encontrado
+        {% else %}
+        {{ total_jogos }} jogos encontrados
+        {% endif %}
+    </p>
+
+    <div class="grid">
+    {% for jogo in jogos %}
+    <div class="card-wrapper">
+        <a href="{{ url_for('jogo', id=jogo.id) }}" class="card-link">
+            <div class="card">
+                <div class="card-capa-container">
+                    {% if jogo.url_capa %}
+                        {% if jogo.url_capa.startswith('http') %}
+                            <img src="{{ jogo.url_capa }}" alt="Capa de {{ jogo.nome }}" class="card-capa" loading="lazy">
+                        {% else %}
+                            <img src="{{ url_for('static', filename=jogo.url_capa) }}" alt="Capa de {{ jogo.nome }}" class="card-capa" loading="lazy">
+                        {% endif %}
+                    {% else %}
+                        <div class="card-capa-placeholder">🎮 Sem imagem</div>
+                    {% endif %}
+                    <span class="card-classificacao">{{ jogo.classificacao }}</span>
+                </div>
+
+                <div class="card-top">
+                    <span class="tag">{{ jogo.genero }}</span>
+                    <span class="ano">{{ jogo.ano }}</span>
+                </div>
+
+                <h2>{{ jogo.nome | truncate(25, true, "...") }}</h2>
+
+                <p class="descricao">{{ jogo.descricao | truncate(90, true, "...") }}</p>
+
+                <div class="infos">
+                    <span>{{ jogo.categoria }}</span>
+                    <span class="ver-mais">Ver detalhes →</span>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% else %}
+    <div class="vazio">
+        <span class="vazio-icone">🕹️</span>
+        <p>Nenhum jogo encontrado com esses filtros.</p>
+    </div>
+    {% endfor %}
+    </div>
+
+    {% if total_paginas > 1 %}
+    <nav class="paginacao">
+        {% set args_sem_pagina = request.args.to_dict() %}
+        {% set _ = args_sem_pagina.pop('pagina', None) %}
+
+        {% if pagina > 1 %}
+        <a href="{{ url_for('index', pagina=pagina-1, **args_sem_pagina) }}" class="pagina-link">‹ Anterior</a>
+        {% else %}
+        <span class="pagina-link pagina-desabilitada">‹ Anterior</span>
+        {% endif %}
+
+        <div class="pagina-numeros">
+            {% for p in range(1, total_paginas + 1) %}
+                {% if p == pagina %}
+                <span class="pagina-numero pagina-atual">{{ p }}</span>
+                {% elif p == 1 or p == total_paginas or (p >= pagina - 1 and p <= pagina + 1) %}
+                <a href="{{ url_for('index', pagina=p, **args_sem_pagina) }}" class="pagina-numero">{{ p }}</a>
+                {% elif p == pagina - 2 or p == pagina + 2 %}
+                <span class="pagina-numero pagina-reticencias">…</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if pagina < total_paginas %}
+        <a href="{{ url_for('index', pagina=pagina+1, **args_sem_pagina) }}" class="pagina-link">Próxima ›</a>
+        {% else %}
+        <span class="pagina-link pagina-desabilitada">Próxima ›</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+
+</div>

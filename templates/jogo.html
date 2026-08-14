@@ -4,8 +4,12 @@
 <div class="topo">
     <h1>{{ jogo.nome }}</h1>
     <div class="topo-acoes">
-        <a href="{{ url_for('index') }}" class="btn" style="background: rgba(255,255,255,0.15);">← Voltar</a>
-        <a href="{{ url_for('editar', id=jogo.id) }}" class="btn btn-editar">Editar</a>
+        <a href="{{ url_for('index') }}" class="btn btn-secundario">← Voltar</a>
+        <button
+            type="button"
+            class="btn btn-editar abrir-painel-formulario"
+            data-url="{{ url_for('editar', id=jogo.id) }}"
+        >Editar</button>
         <form method="POST" action="{{ url_for('deletar', id=jogo.id) }}" onsubmit="return confirm('Tem certeza que deseja deletar este jogo?')">
             <input type="hidden" name="_method" value="DELETE">
             <button type="submit" class="btn btn-deletar">Deletar</button>
@@ -24,14 +28,14 @@
             {% endif %}
         </div>
     {% else %}
-        <div class="jogo-capa-placeholder">Sem imagem</div>
+        <div class="jogo-capa-placeholder">🎮 Sem imagem</div>
     {% endif %}
 
     <div class="jogo-detalhes-info">
+        <span class="jogo-classificacao-badge">{{ jogo.classificacao }}</span>
         <p><strong>Descrição:</strong> {{ jogo.descricao }}</p>
         <p><strong>Gênero:</strong> {{ jogo.genero }}</p>
         <p><strong>Categoria:</strong> {{ jogo.categoria }}</p>
-        <p><strong>Classificação:</strong> {{ jogo.classificacao }}</p>
         <p><strong>Ano:</strong> {{ jogo.ano }}</p>
     </div>
 

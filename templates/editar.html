@@ -1,88 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="topo">
-    <h1>Editar Jogo</h1>
-    <a href="{{ url_for('jogo', id=jogo.id) }}" class="btn">← Voltar</a>
+
+<div class="painel painel-fallback">
+    {% include "_jogo_form.html" %}
 </div>
 
-<div class="painel">
-    <form method="POST" enctype="multipart/form-data" class="cadastro-form">
-        <input type="hidden" name="_method" value="PUT">
-
-        <label for="nome">Nome do jogo</label>
-        <input type="text" id="nome" name="nome" placeholder="Nome do jogo" value="{{ dados.get('nome', jogo.nome) }}" required>
-
-        <label for="descricao">Descrição do jogo</label>
-        <textarea id="descricao" name="descricao" placeholder="Descrição do jogo" required>{{ dados.get('descricao', jogo.descricao) }}</textarea>
-
-        <label for="genero_id">Gênero</label>
-        <select id="genero_id" name="genero_id" required>
-            <option value="">Selecione um gênero</option>
-            {% for genero in generos %}
-            <option value="{{ genero.id }}" {% if dados.get('genero_id')|int(jogo.genero_id) == genero.id %}selected{% endif %}>{{ genero.nome }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="categoria_id">Categoria</label>
-        <select id="categoria_id" name="categoria_id" required>
-            <option value="">Selecione uma categoria</option>
-            {% for categoria in categorias %}
-            <option value="{{ categoria.id }}" {% if dados.get('categoria_id')|int(jogo.categoria_id) == categoria.id %}selected{% endif %}>{{ categoria.nome }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="classificacao">Classificação</label>
-        <select id="classificacao" name="classificacao" required>
-            <option value="">Selecione a classificação</option>
-            {% for classificacao in classificacoes %}
-            <option value="{{ classificacao }}" {% if dados.get('classificacao', jogo.classificacao) == classificacao %}selected{% endif %}>{{ classificacao }}</option>
-            {% endfor %}
-        </select>
-
-        <label for="ano">Ano de lançamento</label>
-        <input
-        type="number"
-        id="ano"
-        name="ano"
-        placeholder="Ano de lançamento"
-        value="{{ dados.get('ano', jogo.ano) }}"
-        min="1970"
-        max="{{ ano_atual }}"
-        step="1"
-        oninput="if(this.value.length > 4) this.value = this.value.slice(0,4)"
-        required>
-        
-        {% if jogo.url_capa %}
-
-            {% if jogo.url_capa.startswith('http') %}
-
-                <img src="{{ jogo.url_capa }}"
-                    class="capa-preview">
-
-        {% else %}
-
-            <img src="{{ url_for('static', filename=jogo.url_capa) }}"
-                class="capa-preview">
-
-        {% endif %}
-
-{% endif %}
-
-        <!--<label class="label-capa">
-            Nova Imagem de Capa
-            <input type="file" name="capa" accept="image/*">
-        </label>-->
-        <label for="capa_url">Informe a URL da nova imagem (opcional — substitui a atual)
-        </label>
-        <input
-            type="url"
-            id="capa_url"
-            name="capa_url"
-            placeholder="https://site.com/imagem.jpg"
-            value="{{ dados.get('capa_url', '') }}">
-
-        <button type="submit">Salvar Alterações</button>
-    </form>
-</div>
 {% endblock %}
