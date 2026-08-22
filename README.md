@@ -1,67 +1,95 @@
-# GameVerse
+GameVerse
 
-Sistema web desenvolvido em **Python** utilizando **Flask** para o cadastro e gerenciamento de jogos. O projeto permite adicionar, editar, excluir e visualizar jogos de forma simples e organizada, além de realizar pesquisas e filtrar os resultados.
+Sistema web para cadastro e gerenciamento de jogos, desenvolvido como projeto acadêmico para aplicação prática de conceitos de desenvolvimento web, Python, Flask e banco de dados.
 
----
+Sobre o projeto
 
-# Objetivo
+O GameVerse permite organizar um catálogo de jogos através de uma aplicação web, possibilitando cadastrar, editar, excluir, pesquisar e filtrar registros.
 
-O GameVerse foi desenvolvido com o objetivo de aplicar conceitos de desenvolvimento web, programação em Python e organização de projetos utilizando o padrão MVC, proporcionando uma aplicação funcional para gerenciamento de um catálogo de jogos.
+O projeto foi desenvolvido buscando separar responsabilidades entre as diferentes partes da aplicação, facilitando sua organização e manutenção.
 
----
+Funcionalidades
 
-# Funcionalidades
+- Cadastro de jogos
+- Edição de jogos
+- Exclusão de jogos
+- Pesquisa por nome
+- Filtros por categoria e gênero
+- Paginação
+- Upload de capas
+- Validação de imagens
+- Interface responsiva
+- Persistência de dados em banco de dados
 
-* Cadastro de jogos
-* Edição de informações dos jogos
-* Exclusão de jogos
-* Upload de imagem de capa
-* Validação de imagens enviadas
-* Pesquisa de jogos por nome
-* Filtro por categoria e gênero
-* Paginação da lista de jogos
-* Interface responsiva
-* Armazenamento dos dados em arquivos JSON
+Tecnologias
 
----
+- Python
+- Flask
+- PostgreSQL
+- SQL
+- HTML5
+- CSS3
+- JavaScript
+- Jinja2
+- Git/GitHub
 
-# Tecnologias Utilizadas
+Estrutura
 
-* Python 3
-* Flask
-* HTML5
-* CSS3
-* JavaScript
-* Jinja2
-* JSON
-
----
-
-# Estrutura do Projeto
-
-```text
 GameVerse/
-│
 ├── static/
 │   ├── css/
 │   ├── js/
-│   ├── uploads/
-│   └── imagens/
-│
+│   ├── imagens/
+│   └── uploads/
 ├── templates/
-│   ├── base.html
-│   ├── index.html
-│   ├── cadastrar.html
-│   ├── editar.html
-│   └── ...
-│
 ├── app.py
+├── config.py
 ├── model.py
 ├── utils.py
-├── config.py
-├── jogos.json
-├── categorias.json
-├── generos.json
+├── requirements.txt
+└── README.md
+
+Principais conceitos aplicados
+
+- Desenvolvimento web com Flask
+- Arquitetura e organização modular
+- Operações CRUD
+- Integração com banco de dados relacional
+- SQL
+- Relacionamento entre entidades
+- Validação de dados
+- Upload e gerenciamento de arquivos
+- Paginação e filtros
+- Controle de versão com Git
+
+Execução
+
+Clone o repositório:
+
+git clone https://github.com/jcesarX/GameVerse.git
+cd GameVerse
+
+Crie um ambiente virtual:
+
+python -m venv venv
+
+Ative o ambiente virtual e instale as dependências:
+
+pip install -r requirements.txt
+
+Configure o banco de dados conforme as configurações do projeto e execute:
+
+python app.py
+
+Objetivo
+
+Projeto desenvolvido para fins acadêmicos e de aprendizado, com foco na prática de desenvolvimento de aplicações web utilizando Python e Flask.
+
+Autor
+
+Júlio César Xavier Marinho
+
+"GitHub" (https://github.com/jcesarX)├── generos.json
 ├── requirements.txt
 └── README.md
 ```
